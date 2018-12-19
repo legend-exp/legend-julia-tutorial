@@ -1,0 +1,333 @@
+
+This tutorial is licensed under the MIT License (MIT).
+
+```julia
+println("Number of threads: $(Base.Threads.nthreads())")
+```
+
+```julia
+using Plots; pyplot();
+```
+
+```julia
+# Load required Julia packages:
+
+using ArraysOfArrays, StaticArrays, Tables, TypedTables
+using Statistics, Random, Distributions, StatsBase
+using Unitful
+import HDF5
+
+using SolidStateDetectors
+using SolidStateDetectors: CylindricalGrid, PointTypes
+using RadiationSpectra
+using RadiationDetectorSignals
+using RadiationDetectorSignals: group_by_evtno, ungroup_by_evtno, group_by_evtno_and_detno
+using LegendDataTypes
+using LegendHDF5IO: readdata, writedata
+using LegendTextIO
+```
+
+```julia
+```
+
+<h1 style="text-align: center">
+    LEGEND Software Stack Tutorial in <br/>
+    <img alt="Julia" src="images/logos/julia-logo.svg" style="height: 2em; display: inline-block; margin: 1em;"/>
+</h1>
+
+<p style="text-align: center">
+    Lukas&nbsp;Hauertmann&nbsp;&lang;<a href="mailto:lhauert@mpp.mpg.de" target="_blank">lhauert@mpp.mpg.de</a>&rang;,
+    Oliver&nbsp;Schulz&nbsp;&lang;<a href="mailto:oschulz@mpp.mpg.de" target="_blank">oschulz@mpp.mpg.de</a>&rang;,
+    Martin&nbsp;Schuster&nbsp;&lang;<a href="mailto:schuster@mpp.mpg.de" target="_blank">schuster@mpp.mpg.de</a>&rang;,
+    Anna&nbsp;Julia&nbsp;Zsigmond&nbsp;&lang;<a href="azsigmon@mpp.mpg.de" target="_blank">azsigmon@mpp.mpg.de</a>&rang;
+</p>
+
+<div style="margin-top:1em">
+    <p style="text-align: center">
+        <img alt="LEGEND Logo" src="images/logos/legend-logo.svg" style="height: 10em; display: inline-block; margin: 1em;"/>
+    </p>
+</div>
+
+<p>See <a href="README.md">README.md</a> for instructions.</p>
+
+## Calculation of detector potentials and fields
+
+### Detector definition
+
+First, load a detector definition - here, an inverted-coaxial example detector design:
+
+```julia
+detector_config_filename = SSD_examples[:InvertedCoax]
+T = Float32 # Optional; Default is Float32, but works with Float64 as well
+detector = SolidStateDetector{T}(detector_config_filename)
+plot(detector)
+```
+
+Next, calculate the electric potential:
+
+```julia
+E_pot, point_types = calculate_electric_potential(detector)
+SolidStateDetectors.extent_2D_grid_to_3D!(E_pot, 36);
+```
+
+```julia
+plot(E_pot, φ=0, contours_equal_potential=true, levels=30)
+plot!(detector, :plane, φ=0)
+```
+
+SolidStateDetectors.jl supports active (i.e. depleted) volume calculation:
+
+```julia
+get_active_volume(E_pot, point_types)
+```
+
+### Partially depleted detectors
+
+SolidStateDetectors.jl can also calculate the electric potential of a partially depleted detector:
+
+```julia
+detector_undep = deepcopy(detector)
+detector_undep.segment_bias_voltages[2:end] .= 1500; # Bias Voltage
+```
+
+```julia
+E_pot_undep, point_types_undep = calculate_electric_potential(detector_undep,
+                                                    depletion_handling=true,
+                                                    convergence_limit=1e-5)
+SolidStateDetectors.extent_2D_grid_to_3D!(E_pot_undep, 36);
+```
+
+```julia
+plot(
+    plot(E_pot_undep, title="E_Pot", contours_equal_potential=true, levels=30),
+    plot(point_types_undep, title="Point Type Map"),
+    size=(900, 800)
+)
+```
+
+### Electric field calculation
+
+Calculate the electric field of the fully depleted detector, given the already calculated electric potential:
+
+```julia
+E_field = SolidStateDetectors.get_electric_field_from_potential(E_pot);
+```
+
+```julia
+plot(E_field, detector, E_pot)
+plot!(detector, :plane)
+```
+
+### Drift field calculation
+
+Given the electric field and a charge drift model, calculate drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation:
+
+```julia
+drift_model = ADLChargeDriftModel()
+electron_drift_field = get_electron_drift_field(E_field, drift_model);
+hole_drift_field = get_hole_drift_field(E_field, drift_model);
+```
+
+We'll need interpolated fields to simulate charge drift:
+
+```julia
+electron_drift_field_interpolated = SolidStateDetectors.get_interpolated_drift_field(electron_drift_field, E_pot);
+hole_drift_field_interpolated = SolidStateDetectors.get_interpolated_drift_field(hole_drift_field, E_pot);
+```
+
+Now, let's drift a charge carriers created at an arbitrary position:
+
+```julia
+pos = [SVector{3, T}(0.003,0.000,0.01), SVector{3,T}(0.01, 0.0,0.038), SVector{3,T}(0.02, 0.0,0.078)]
+drift_paths = SolidStateDetectors.drift_charges(detector, pos, electron_drift_field_interpolated, hole_drift_field_interpolated);
+p0 = plot(detector)
+plot!(drift_paths, scaling=1e3)
+```
+
+### Weighting potential calculation
+
+We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
+
+```julia
+W_pot_pc = SolidStateDetectors.calculate_weighting_potential(detector, 1, verbose=false);
+W_pot_shell  = SolidStateDetectors.calculate_weighting_potential(detector, 2, verbose=false);
+```
+
+```julia
+p=plot(plot(W_pot_pc), plot(W_pot_shell), size=(900,700))
+plot!(p[1], detector,:plane)
+plot!(p[2], detector,:plane)
+```
+
+Since the weighting potentials are calculated on a grid, like the electrical potential/field and drift fields, we need to interpolate them as well:
+
+```julia
+W_pot_pc_ext = SolidStateDetectors.extent_2D_grid_to_3D(W_pot_pc, 2);
+W_pot_pc_interp = SolidStateDetectors.interpolated_scalarfield(W_pot_pc_ext);
+```
+
+## Detector waveform generation
+
+### Single-event simulation
+
+Given an interaction at an arbitrary point in the detector, we can now simulate charge drift and the resulting detector charge signals (e.g. at the point contact):
+
+```julia
+interaction_point = SVector{3,T}(100,100,300);
+charge_signal = SolidStateDetectors.pulse_from_drift_paths(drift_paths, interaction_point, W_pot_pc_interp);
+```
+
+```julia
+myChargeDriftEvent = SolidStateDetectors.drift_charges(detector, pos, electron_drift_field_interpolated, hole_drift_field_interpolated,interaction_point,[W_pot_pc_interp]);
+plot(myChargeDriftEvent, detector)
+```
+
+### Waveform generation for Geant4 MC events
+
+Let's read in some Monte-Carlo events (produced by Geant4). We'll either read from Geant4 CSV and cache the result as HDF5, or read directly from HDF5 if already available:
+
+```julia
+mctruth_filename_csv = joinpath("data", "dual-invcoax-mctruth.csv")
+mctruth_filename_hdf5 = joinpath("cache", "dual-invcoax-mctruth.h5")
+if isfile(mctruth_filename_hdf5)
+    println("Reading MC events from HDF5.")
+    mc_events = HDF5.h5open(mctruth_filename_hdf5, "r") do input
+        readdata(input, "mctruth")
+    end
+else
+    println("Reading MC events from Geant4-CSV.")
+    mc_events = open(read, mctruth_filename_csv, Geant4CSVInput)
+    mkpath(dirname(mctruth_filename_hdf5))
+    println("Writing MC events to HDF5.")
+    HDF5.h5open(mctruth_filename_hdf5, "w") do output
+        writedata(output, "mctruth", mc_events)
+    end
+end
+```
+
+Producing pulse shapes from raw MC events is wastful, it's more efficient to cluster detectors hits (within a small radius) first:
+
+```julia
+println("$(sum(length.(mc_events.edep))) hits before clustering")
+mc_events_clustered = @time cluster_detector_hits(mc_events, 0.2u"mm")
+println("$(sum(length.(mc_events_clustered.edep))) hits after clustering")
+```
+
+Table of MC events is of type `DetectorHitEvents`:
+
+```julia
+typeof(mc_events_clustered) <: DetectorHitEvents
+```
+
+We have a plotting reciple for `DetectorHitEvents`:
+
+```julia
+plot(mc_events_clustered)
+```
+
+Waveform generation has to be per detector. Let's reshuffle the detector hits, grouping by event number and detector:
+
+```julia
+hits = ungroup_by_evtno(mc_events_clustered)
+mc_events_per_det = group_by_evtno_and_detno(hits)
+```
+
+The hits are now grouped by event number, but separately for each detector, and sorted by detector number:
+
+```julia
+issorted(mc_events_per_det.detno)
+```
+
+This makes it easy to group them by detector number ...
+
+```julia
+mc_events_by_det = Table(consgroupedview(mc_events_per_det.detno, Tables.columns(mc_events_per_det)))
+```
+
+... and get all events for detector 1 in one chunk:
+
+```julia
+mc_events_det1 = Table(mc_events_by_det[1])
+```
+
+```julia
+plot(mc_events_det1)
+```
+
+Raw MC events have a very narrow line width:
+
+```julia
+stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, yscale = :log10)
+```
+
+Let's make things more realistic by adding Fano noise:
+
+```julia
+det_material = detector.material_detector
+mc_events_fnoise = add_fano_noise(mc_events_det1, det_material.E_ionisation, det_material.f_fano)
+stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, label = "raw MC edep", yscale = :log10)
+stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = "with Fano noise", yscale = :log10)
+```
+
+Also, we need to filter out the few events that, due to numerical effects, lie outside of the detector (the proper solution is to shift them slightly, this feature will be added in the future):
+
+```julia
+filtered_events = mc_events_fnoise[findall(pts -> all(p -> p in detector, pts), mc_events_fnoise.pos)];
+length(filtered_events)
+```
+
+```julia
+delta_t = 10u"ns"
+contact_charge_signals, drift_times = @time generate_charge_signals(
+    detector, electron_drift_field_interpolated, hole_drift_field_interpolated, [W_pot_pc_interp],
+    filtered_events,
+    128, delta_t
+);
+```
+
+Let's plot the first 100 generated waveforms:
+
+```julia
+waveforms = contact_charge_signals[1]
+plot(waveforms[1:100], legend = false)
+```
+
+We should add pre- and post-pulse baselines ...
+
+```julia
+waveforms_with_baseline = nestedview(vcat(fill!(similar(flatview(waveforms)), 0), flatview(waveforms)))
+plot(waveforms_with_baseline[1:100], legend = false)
+```
+
+... and also add some random values along the waveforms to simulate electronics noise in a simple fashion:
+
+```julia
+noise = rand!(Normal(0,5e3), similar(flatview(waveforms_with_baseline)))
+noisy_waveforms = nestedview(flatview(waveforms_with_baseline) .+ noise)
+plot(noisy_waveforms[1:100], legend = false)
+```
+
+## Waveform DSP
+
+Note: This section only demonstrates a very simple form of DSP for energy reconstruction, and will be extended in the near future.
+
+We can reconstruct a spectrum from the simulated waveforms, using the difference between the pre- and post-pulse baseline means energy of the events (equivalent to a triangular shaping filter in a fixed position):
+
+```julia
+pre_pulse_mean = vec(mean(flatview(noisy_waveforms)[1:30, :], dims = 1))
+post_pulse_mean = vec(mean(flatview(noisy_waveforms)[230:255, :], dims = 1))
+E_reco = post_pulse_mean .- pre_pulse_mean
+hist_uncal = fit(Histogram, E_reco, nbins = 10000)
+plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
+```
+
+## Spectrum analysis
+
+The package RadiationSpectra.jl provides a mechanism finding peaks in the spectrum. It can also auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:
+
+```julia
+gamma_lines = [510.77, 583.191, 2614.533] 
+hist_cal = RadiationSpectra.calibrate_spectrum(hist_uncal, gamma_lines, min_n_peaks=20 )
+plot(hist_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000)
+vline!(gamma_lines, label="gamma lines")
+```
