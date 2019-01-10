@@ -40,7 +40,7 @@ On Linux, Julia (more specifically the Julia packages [IJulia.jl](https://github
 
 However, on OS-X and Windows, both IJulia.jl and PyCall.jl by default always create a Julia-internal Conda installation (see above), even if Jupyter and matplotlib/PyPlot are available (apparently broken Jupyter/Python installations on these platforms caused frequent support requests). 
 
-In contrast to this default behavior, we recommend to use a standalone Jupyter and Python installation on all OS platforms. Therefore, the "install_julia_packages.jl" script (see below) does *not* follow these default. Instead, it tries to detect an existing installation and forces IJulia.jl and PyCall.jl to use it (by temporarily setting the environment variables `$JUPYTER` and `$PYTHON`). We recommend that you install Anaconda (especially on on OS-X and Windows) before running the package install script, and to make sure the Python and Jupyter programs provided by Anaconda are on your `$PATH` (default on OS-X, installer option on Windows). As an additional benefit, you gain a complete standalone Python environment that can also be used for LEGEND Python projects like [pygamma](https://github.com/wisecg/pygama).
+In contrast to this default behavior, we recommend to force IJulia.jl and PyCall.jl to use an existing external Jupyter and Python installation on all OS platforms. Do to this, you need to set the environment variables `.$JUPYTER` and `$PYTHON`. Run the `julia system_check.jl` to verify that things are set up correctly.script (see below) does *not* follow these default. To install Jupyter and matplotlib/PyPlot we recommend that you install Anaconda (especially on on OS-X and Windows) before doing so, and to make sure the Python and Jupyter programs provided by Anaconda are on your `$PATH` (default on OS-X, installer option on Windows). As an additional benefit, you gain a complete standalone Python environment that can also be used for LEGEND Python projects like [pygamma](https://github.com/wisecg/pygama).
 
 
 #### Installing Anaconda
@@ -58,7 +58,7 @@ To install Anaconda
 
 Julia bindings for HDF5 are provided by the package [HDF5.jl](https://github.com/JuliaIO/HDF5.jl), but HDF5.jl requires the HDF5 C-libraries to be installed.
 
-On Linux, install the HD5 system package provided by your distribution. On OS-X, install HDF5 via [Homebrew](https://brew.sh/). On Windows, HDF5.jl should automatically install a version of the HDF5 libraries internally.
+On Linux, install the HD5 system package provided by your distribution. On OS-X, if Julia fails to automatically install HDF5 internally via [Homebrew.jl](https://github.com/JuliaPackaging/Homebrew.jl), install HDF5 manually via [Homebrew](https://brew.sh/). On Windows, HDF5.jl should automatically install a version of the HDF5 libraries internally.
 
 
 ## Setting up the tutorial and installation of required Julia packages

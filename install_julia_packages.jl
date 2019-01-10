@@ -1,6 +1,13 @@
 # This script is licensed under the MIT License (MIT).
 
-include("system_check.jl")
+if !Sys.isunix() || Sys.isapple()
+    for envvar_name in ["JUPYTER", "PYTHON"]
+        if !haskey(ENV, envvar_name)
+            @error "Please set environment variable $envvar_name, run \"julia system_check.jl\" for details."
+            exit(1)
+        end
+    end
+end
 
 using Pkg
 

@@ -28,7 +28,7 @@ function detect_application(
 
         try
             cmd_version = chomp(read(`$cmd_name --version`, String))
-            ENV[envvar_name] = cmd_name
+            # ENV[envvar_name] = cmd_name
             @info "Using command \"$cmd_name\" for $application_name, $application_name version $cmd_version"
         catch err
             @error "Trying to use $application_name command \"$cmd_name\", but \"$cmd_name --version\" fails."
@@ -43,6 +43,10 @@ function detect_application(
                 @error "Python cannot import matplotlib.pyplot, consider installing Anaconda and adding the Anaconda \"bin\" directory to your \$PATH"
                 exit(1)
             end
+        end
+
+        if !haskey(ENV, envvar_name)
+            println("Please set environment variable $envvar_name=\"$cmd_name\"")
         end
     end
 end
