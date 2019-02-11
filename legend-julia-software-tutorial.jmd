@@ -79,8 +79,8 @@ Now, extract the electric potential and the point types:
 
 ```julia
 E_pot = ElectricPotential(ElectricPotentialSetup, n_points_in_θ=36);
-point_types = PointTypes(ElectricPotentialSetup);
-ElectricPotentialSetup = 0; # save memory
+point_types = PointTypes(ElectricPotentialSetup, n_points_in_θ=36);
+# ElectricPotentialSetup = 0; # save memory
 ```
 
 ```julia
@@ -102,39 +102,37 @@ get_active_volume(point_types)
 
 SolidStateDetectors.jl can also calculate the electric potential of a partially depleted detector:
 
-```julia
 detector_undep = deepcopy(detector)
-detector_undep.segment_bias_voltages[2:end] .= 1500; # Bias Voltage
-```
+detector_undep.segment_bias_voltages[1] = -1500; # Bias Voltage
 
-```julia
 ElectricPotentialSetup_undep = calculate_electric_potential(detector_undep,
                                                     depletion_handling=true,
                                                     convergence_limit=1e-6, max_refinements=3)
 E_pot_undep = ElectricPotential(ElectricPotentialSetup_undep, n_points_in_θ=12);
-point_types_undep = PointTypes(ElectricPotentialSetup_undep);
+point_types_undep = PointTypes(ElectricPotentialSetup_undep, n_points_in_θ=12);
 ElectricPotentialSetup_undep = 0; # save memory
-```
 
-```julia
 plot(
     plot(E_pot_undep, contours_equal_potential=true, levels=30),
     plot(point_types_undep), 
     size=(900, 800)
 )
-```
 
 ### Electric field calculation
 
 Calculate the electric field of the fully depleted detector, given the already calculated electric potential:
 
 ```julia
-E_field = SolidStateDetectors.get_electric_field_from_potential(E_pot);
+E_field = SolidStateDetectors.get_electric_field_from_potential(E_pot, point_types);
 ```
 
 ```julia
-plot(E_field, detector, E_pot, θ = 5, spacing=0.002) #, detector, E_pot)
+plot(E_field, detector, E_pot, θ = 5, spacing=0.002, n_steps = 2000) #, detector, E_pot)
 plot!(detector, :plane)
+```
+
+```julia
+detector.borehole_radius
 ```
 
 ### Drift field calculation
@@ -157,7 +155,7 @@ hole_drift_field_interpolated = SolidStateDetectors.get_interpolated_drift_field
 Now, let's drift a charge carriers created at an arbitrary position:
 
 ```julia
-pos = [SVector{3, T}(0.003,0.000,0.01), SVector{3,T}(0.01, 0.0,0.038), SVector{3,T}(0.02, 0.0,0.078)]
+pos = [SVector{3, T}(0.003,0.000,0.01), SVector{3,T}(0.01, 0.0,0.038), SVector{3,T}(0.02, 0.0,0.058)]
 drift_paths = SolidStateDetectors.drift_charges(detector, pos, electron_drift_field_interpolated, hole_drift_field_interpolated);
 p0 = plot(detector)
 plot!(drift_paths, scaling=1e3)
@@ -168,13 +166,13 @@ plot!(drift_paths, scaling=1e3)
 We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
 
 ```julia
-W_pot_setup_pc = calculate_weighting_potential(detector, 1, max_refinements=3, verbose=false);
-W_pot_setup_shell  = calculate_weighting_potential(detector, 2, max_refinements=3, verbose=false);
+W_pot_setup_pc    = calculate_weighting_potential(detector, 1, max_refinements=3, verbose=false);
+W_pot_setup_shell = calculate_weighting_potential(detector, 2, max_refinements=3, verbose=false);
 ```
 
 ```julia
-W_pot_pc = WeightingPotential(W_pot_setup_pc, n_points_in_θ = 36);
-W_pot_shell = WeightingPotential(W_pot_setup_shell, n_points_in_θ = 36);
+W_pot_pc    = WeightingPotential(W_pot_setup_pc,    n_points_in_θ = 2);
+W_pot_shell = WeightingPotential(W_pot_setup_shell, n_points_in_θ = 2);
 W_pot_setup_pc = 0; W_pot_setup_shell = 0; # save memory
 ```
 
@@ -187,12 +185,11 @@ plot!(p[2], detector,:plane)
 Since the weighting potentials are calculated on a grid, like the electrical potential/field and drift fields, we need to interpolate them as well:
 
 ```julia
-W_pot_pc_ext = SolidStateDetectors.get_2π_potential(W_pot_pc, n_points_in_θ = 2);
-W_pot_pc_interp = SolidStateDetectors.interpolated_scalarfield(W_pot_pc_ext);
+W_pot_pc_interp = SolidStateDetectors.interpolated_scalarfield(W_pot_pc);
 ```
 
 ```julia
-plot(W_pot_pc_ext.grid, layout=(1, 3), size = (900, 300))
+plot(W_pot_pc.grid, layout=(1, 3), size = (900, 300))
 ```
 
 ## Detector waveform generation
@@ -306,6 +303,10 @@ length(filtered_events)
 ```
 
 ```julia
+in(SSD.CylindricalPoint(SSD.CartesianPoint(SSD.to_internal_units(u"m", filtered_events.pos[1][1]))), detector)
+```
+
+```julia
 delta_t = 10u"ns"
 contact_charge_signals, drift_times = @time generate_charge_signals(
     detector, electron_drift_field_interpolated, hole_drift_field_interpolated, [W_pot_pc_interp],
@@ -356,7 +357,7 @@ The package RadiationSpectra.jl provides a mechanism finding peaks in the spectr
 
 ```julia
 gamma_lines = [510.77, 583.191, 2614.533] 
-hist_cal = RadiationSpectra.calibrate_spectrum(hist_uncal, gamma_lines, min_n_peaks=20 )
+hist_cal = RadiationSpectra.calibrate_spectrum(hist_uncal, gamma_lines, min_n_peaks=10 )
 plot(hist_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000)
 vline!(gamma_lines, label="gamma lines")
 ```
