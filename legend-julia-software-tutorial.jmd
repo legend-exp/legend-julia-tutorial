@@ -6,6 +6,10 @@ println("Number of threads: $(Base.Threads.nthreads())")
 ```
 
 ```julia
+versioninfo()
+```
+
+```julia
 using Plots; pyplot();
 ```
 
@@ -54,7 +58,7 @@ First, load a detector definition - here, an inverted-coaxial example detector d
 
 ```julia
 detector_config_filename = SSD_examples[:InvertedCoax]
-T = Float32 # Optional; Default is Float32, but works with Float64 as well
+T = Float64 # Optional; Default is Float32, but works with Float64 as well
 simulation = Simulation{T}(detector_config_filename)
 plot(simulation.detector, size = (700, 700))
 ```
@@ -100,12 +104,12 @@ SolidStateDetectors.jl can also calculate the electric potential of a partially 
 
 ```julia
 detector_undep = deepcopy(simulation.detector)
-detector_undep.contacts[end].potential = 200; # V  <-- Bias Voltage
+detector_undep.contacts[end].potential = 500; # V  <-- Bias Voltage
 ```
 
 ```julia
 simulation_undep = Simulation(detector_undep);
-SSD.calculate_electric_potential!(simulation_undep, depletion_handling = true, convergence_limit=1e-6, max_refinements = 4, verbose = false);
+SSD.calculate_electric_potential!(simulation_undep, depletion_handling = true, convergence_limit=1e-3, max_refinements = 4, verbose = false);
 ```
 
 ```julia
@@ -129,18 +133,9 @@ Calculate the electric field of the fully depleted detector, given the already c
 SSD.calculate_electric_field!(simulation, n_points_in_φ = 72)
 ```
 
-```julia
-plot_electric_field(simulation, φ = 0)
-```
-
 ### Drift field calculation
 
 Given the electric field and a charge drift model, calculate drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation:
-
-```julia
-drift_model = ADLChargeDriftModel()
-SSD.set_charge_drift_model!(simulation, drift_model)
-```
 
 And apply the charge drift model to the electric field:
 
@@ -203,20 +198,13 @@ end
 ```
 
 ```julia
-simulation = HDF5.h5open(filename, "r") do h5f
-    Simulation(readdata(h5f, "inverted_coax_simulation"));
-end;
-SSD.set_charge_drift_model!(simulation, ADLChargeDriftModel())
-```
-
-```julia
 simulation
 ```
 
 # Quick Simulation
 
 ```julia
-quick_sim = Simulation(detector_config_filename)
+quick_sim = Simulation{T}(detector_config_filename)
 simulate!(quick_sim); # Keywords (defaults):  max_refinements = 1, verbose = false
 plot( 
     plot(quick_sim.electric_potential),
@@ -366,11 +354,17 @@ plot(waveforms[1:100], legend = false)
 
 ```julia
 evt1 = SSD.Event(filtered_events[1], T)
-SSD.simulate!(evt1, simulation, n_steps = 2000, Δt = 10u"ns", verbose = true)
+SSD.simulate!(evt1, simulation, n_steps = 10000, Δt = 20u"ns", verbose = true)
 p_drift = plot(simulation.detector)
 plot!(evt1.drift_paths)
 p_signal = plot(evt1.signals)
 plot(p_drift, p_signal, size = (1200, 600))
+```
+
+```julia
+```
+
+```julia
 ```
 
 We should add pre- and post-pulse baselines ...
@@ -397,9 +391,11 @@ We can reconstruct a spectrum from the simulated waveforms, using the difference
 ```julia
 filter_length = 50
 pre_pulse_mean = vec(mean(flatview(noisy_waveforms)[1:filter_length, :], dims = 1))
+pre_pulse_std = vec(std(flatview(noisy_waveforms)[1:filter_length, :], dims = 1))
+energy_threshold = mean(pre_pulse_std) * 3
 post_pulse_mean = vec(mean(flatview(noisy_waveforms)[end-filter_length:end, :], dims = 1))
 E_reco = post_pulse_mean .- pre_pulse_mean
-hist_uncal = fit(Histogram, E_reco, nbins = 2000)
+hist_uncal = fit(Histogram, filter(e -> e > energy_threshold, E_reco), nbins = 2000)
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
 ```
 
@@ -416,6 +412,15 @@ hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
+```
+
+```julia
+```
+
+```julia
+```
+
+```julia
 ```
 
 ```julia
