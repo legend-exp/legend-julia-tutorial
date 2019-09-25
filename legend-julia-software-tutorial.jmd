@@ -10,11 +10,9 @@ versioninfo()
 ```
 
 ```julia
-using Plots; pyplot();
-```
-
-```julia
 # Load required Julia packages:
+using Random
+using Plots; pyplot();
 
 using ArraysOfArrays, StaticArrays, Tables, TypedTables
 using Statistics, Random, Distributions, StatsBase
@@ -66,7 +64,7 @@ plot(simulation.detector, size = (700, 700))
 One can also have a look at how the initial conditions look like on the grid (its starts with a very coarse grid):
 
 ```julia
-SSD.apply_initial_state!(simulation) # optional 
+apply_initial_state!(simulation, ElectricPotential) # optional 
 plot(
     plot(simulation.electric_potential), # initial electric potential (boundary conditions)
     plot(simulation.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
@@ -79,7 +77,8 @@ plot(
 Next, calculate the electric potential:
 
 ```julia
-SSD.calculate_electric_potential!(simulation, max_refinements = 4)
+calculate_electric_potential!( simulation, 
+                               max_refinements = 4)
 ```
 
 ```julia
@@ -104,12 +103,16 @@ SolidStateDetectors.jl can also calculate the electric potential of a partially 
 
 ```julia
 detector_undep = deepcopy(simulation.detector)
-detector_undep.contacts[end].potential = 500; # V  <-- Bias Voltage
+detector_undep.contacts[end].potential = 500; # V  <-- Bias Voltage of Mantle
 ```
 
 ```julia
 simulation_undep = Simulation(detector_undep);
-SSD.calculate_electric_potential!(simulation_undep, depletion_handling = true, convergence_limit=1e-3, max_refinements = 4, verbose = false);
+calculate_electric_potential!( simulation_undep, 
+                               depletion_handling = true, 
+                               convergence_limit=1e-6, 
+                               max_refinements = 4, 
+                               verbose = false);
 ```
 
 ```julia
@@ -121,8 +124,8 @@ plot(
 ```
 
 ```julia
-println("Depleted: ", get_active_volume(simulation.point_types))
-println("Depleted: ", get_active_volume(simulation_undep.point_types));
+println("Depleted:   ", get_active_volume(simulation.point_types))
+println("Undepleted: ", get_active_volume(simulation_undep.point_types));
 ```
 
 ### Electric field calculation
@@ -130,7 +133,7 @@ println("Depleted: ", get_active_volume(simulation_undep.point_types));
 Calculate the electric field of the fully depleted detector, given the already calculated electric potential:
 
 ```julia
-SSD.calculate_electric_field!(simulation, n_points_in_φ = 72)
+calculate_electric_field!(simulation, n_points_in_φ = 72)
 ```
 
 ### Drift field calculation
@@ -140,21 +143,23 @@ Given the electric field and a charge drift model, calculate drift fields for el
 And apply the charge drift model to the electric field:
 
 ```julia
-SSD.apply_charge_drift_model!(simulation)
+apply_charge_drift_model!(simulation)
 ```
 
 Now, let's create an "random" (multiside) event:
 
 ```julia
-starting_positions = [CylindricalPoint{T}( 0.02, deg2rad(10), 0.015 ), CylindricalPoint{T}( 0.015, deg2rad(20), 0.045 ), CylindricalPoint{T}( 0.025, deg2rad(30), 0.025 )]
-energy_depos = T[1460, 609, 1000] * u"keV" # they are needed later in the signal generation
+starting_positions = [ CylindricalPoint{T}( 0.020, deg2rad(10), 0.015 ), 
+                       CylindricalPoint{T}( 0.015, deg2rad(20), 0.045 ), 
+                       CylindricalPoint{T}( 0.025, deg2rad(30), 0.025 ) ]
+energy_depos = T[1460, 609, 1000] * u"keV" # are needed later in the signal generation
 
-event = SSD.Event(starting_positions, energy_depos);
+event = Event(starting_positions, energy_depos);
 ```
 
 ```julia
 time_step = 5u"ns"
-SSD.drift_charges!(event, simulation, Δt = time_step)
+drift_charges!(event, simulation, Δt = time_step)
 ```
 
 ```julia
@@ -205,7 +210,7 @@ simulation
 
 ```julia
 quick_sim = Simulation{T}(detector_config_filename)
-simulate!(quick_sim); # Keywords (defaults):  max_refinements = 1, verbose = false
+simulate!(quick_sim); # Keywords (defaults): max_refinements = 1, verbose = false
 plot( 
     plot(quick_sim.electric_potential),
     plot(quick_sim.weighting_potentials[1]),
@@ -324,6 +329,7 @@ stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, yscale = :log
 Let's make things more realistic by adding Fano noise:
 
 ```julia
+Random.seed!(123) # only for testing 
 det_material = simulation.detector.semiconductors[1].material
 mc_events_fnoise = add_fano_noise(mc_events_det1, det_material.E_ionisation, det_material.f_fano)
 stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, label = "raw MC edep", yscale = :log10)
@@ -333,16 +339,16 @@ stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = "w
 Also, we need to filter out the few events that, due to numerical effects, lie outside of the detector (the proper solution is to shift them slightly, this feature will be added in the future):
 
 ```julia
-filtered_events = mc_events_fnoise[findall(pts -> all(p -> p in simulation.detector, pts), mc_events_fnoise.pos)];
+filtered_events = mc_events_fnoise[findall(pts -> all(p -> T.(ustrip.(uconvert.(u"m", p))) in simulation.detector, pts), mc_events_fnoise.pos)];
 length(filtered_events)
 ```
 
 ```julia
-in(SSD.CylindricalPoint(SSD.CartesianPoint(SSD.to_internal_units(u"m", filtered_events.pos[1][1]))), simulation.detector)
-```
-
-```julia
-contact_charge_signals = generate_charge_signals( simulation, filtered_events[1:2000], n_steps = 256, Δt = 20u"ns", verbose = false);
+contact_charge_signals = generate_charge_signals( simulation, 
+                                                  filtered_events[1:2000], 
+                                                  n_steps = 256, 
+                                                  Δt = 20u"ns", 
+                                                  verbose = false);
 ```
 
 Let's plot the first 100 generated waveforms:
@@ -352,19 +358,15 @@ waveforms = contact_charge_signals[1]
 plot(waveforms[1:100], legend = false)
 ```
 
+One can also look individual events
+
 ```julia
 evt1 = SSD.Event(filtered_events[1], T)
-SSD.simulate!(evt1, simulation, n_steps = 10000, Δt = 20u"ns", verbose = true)
+SSD.simulate!(evt1, simulation, n_steps = 2500, Δt = 2u"ns", verbose = true)
 p_drift = plot(simulation.detector)
 plot!(evt1.drift_paths)
 p_signal = plot(evt1.signals)
 plot(p_drift, p_signal, size = (1200, 600))
-```
-
-```julia
-```
-
-```julia
 ```
 
 We should add pre- and post-pulse baselines ...
@@ -412,58 +414,4 @@ hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
 ```
