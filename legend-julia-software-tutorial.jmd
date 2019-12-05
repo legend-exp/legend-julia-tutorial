@@ -146,6 +146,26 @@ And apply the charge drift model to the electric field:
 apply_charge_drift_model!(simulation)
 ```
 
+### Weighting potential calculation
+
+We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
+
+```julia
+for contact in simulation.detector.contacts
+    calculate_weighting_potential!(simulation, contact.id, max_refinements = 4, n_points_in_φ = 2, verbose = false)
+end
+```
+
+```julia
+plot(  
+    plot(simulation.weighting_potentials[1]),
+    plot(simulation.weighting_potentials[2]),
+    size = (900, 700)
+)
+```
+
+# Drift and Waveform Simulation
+
 Now, let's create an "random" (multiside) event:
 
 ```julia
@@ -158,8 +178,8 @@ event = Event(starting_positions, energy_depos);
 ```
 
 ```julia
-time_step = 5u"ns"
-drift_charges!(event, simulation, Δt = time_step)
+time_step = 1u"ns"
+simulate!(event, simulation, Δt = time_step, max_nsteps = 2000)
 ```
 
 ```julia
@@ -167,22 +187,9 @@ plot(simulation.detector, size = (700, 700))
 plot!(event.drift_paths)
 ```
 
-### Weighting potential calculation
-
-We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
-
 ```julia
-for contact in simulation.detector.contacts
-    SSD.calculate_weighting_potential!(simulation, contact.id, max_refinements = 4, n_points_in_φ = 2, verbose = false)
-end
-```
-
-```julia
-plot(  
-    plot(simulation.weighting_potentials[1]),
-    plot(simulation.weighting_potentials[2]),
-    size = (900, 700)
-)
+p_pc_signal = plot( event.waveforms[1], lw = 1.5, xlims = (0, 2000), xlabel = "Time / ns",
+                    legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
 ```
 
 # I/O
@@ -197,9 +204,11 @@ simulation
 ```julia
 filename = "cache/inverted_coax_simulation.h5f"
 if !ispath(dirname(filename)) mkpath(dirname(filename)) end
-HDF5.h5open(filename, "w") do h5f
-    writedata( h5f, "inverted_coax_simulation", NamedTuple(simulation)  )
-end
+SolidStateDetectors.ssd_write(filename, simulation)
+```
+
+```julia
+simulation = SolidStateDetectors.ssd_read(filename, Simulation)
 ```
 
 ```julia
@@ -219,36 +228,7 @@ plot(
 )
 ```
 
-## Detector waveform generation
-
-### Single-event simulation
-
-Given an interaction at an arbitrary point in the detector, we can now simulate charge drift and the resulting detector charge signals (e.g. at the point contact):
-
-```julia
-SSD.get_signal!(event, simulation, 1) # 1 = contact id of the point contact, 2 would be the mantle (defined in the config file)
-```
-
-```julia
-time_steps = range(0, step = ustrip(time_step), length = length(event.signals[1]))
-p_pc_signal = plot( time_steps, event.signals[1], lw = 1.5, xlims = (0, 2000), xlabel = "Time / ns", legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
-```
-
-Or just calculate the signals of all channels:
-
-```julia
-SSD.get_signals!(event, simulation) 
-plot(  time_steps, event.signals[1], lw = 1.5, xlims = (0, 2000), xlabel = "Time / ns", legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
-plot!( time_steps, event.signals[2], lw = 1.5)
-```
-
-The drift and signal generation can also be done together:
-
-```julia
-SSD.simulate!(event, simulation) # drift_charges + signal generation of all channels
-```
-
-### Waveform generation for Geant4 MC events
+## Waveform generation for Geant4 MC events
 
 Let's read in some Monte-Carlo events (produced by Geant4). We'll either read from Geant4 CSV and cache the result as HDF5, or read directly from HDF5 if already available:
 
@@ -275,7 +255,7 @@ Producing pulse shapes from raw MC events is wastful, it's more efficient to clu
 
 ```julia
 println("$(sum(length.(mc_events.edep))) hits before clustering")
-mc_events_clustered = @time cluster_detector_hits(mc_events, 0.2u"mm")
+mc_events_clustered = @time SolidStateDetectors.cluster_detector_hits(mc_events, 0.2u"mm")
 println("$(sum(length.(mc_events_clustered.edep))) hits after clustering")
 ```
 
@@ -344,44 +324,50 @@ length(filtered_events)
 ```
 
 ```julia
-contact_charge_signals = generate_charge_signals( simulation, 
-                                                  filtered_events[1:2000], 
-                                                  n_steps = 256, 
-                                                  Δt = 20u"ns", 
-                                                  verbose = false);
+contact_charge_signals = SolidStateDetectors.simulate_waveforms(      
+        filtered_events[1:2000],
+        simulation,
+        max_nsteps = 4000, 
+        Δt = 1u"ns", 
+        verbose = false);
 ```
 
 Let's plot the first 100 generated waveforms:
 
 ```julia
-waveforms = contact_charge_signals[1]
+waveforms = ArrayOfRDWaveforms(contact_charge_signals.waveform)
 plot(waveforms[1:100], legend = false)
 ```
 
 One can also look individual events
 
 ```julia
-evt1 = SSD.Event(filtered_events[1], T)
-SSD.simulate!(evt1, simulation, n_steps = 2500, Δt = 2u"ns", verbose = true)
+evt1 = Event(filtered_events[1], T)
+simulate!(evt1, simulation, max_nsteps = 4000, Δt = 1u"ns", verbose = true)
 p_drift = plot(simulation.detector)
 plot!(evt1.drift_paths)
-p_signal = plot(evt1.signals)
+p_signal = plot(evt1.waveforms[1], lw = 2)
 plot(p_drift, p_signal, size = (1200, 600))
 ```
 
 We should add pre- and post-pulse baselines ...
 
 ```julia
-waveforms_with_baseline = nestedview(vcat(fill!(similar(flatview(waveforms)), 0), flatview(waveforms)))
-plot(waveforms_with_baseline[1:100], legend = false)
+waveforms_with_baseline_and_tail = ArrayOfRDWaveforms(SolidStateDetectors.add_baseline_and_extend_tail.(waveforms, 1200, 7000));
+plot(waveforms_with_baseline_and_tail[1:10], legend = false)
 ```
 
 ... and also add some random values along the waveforms to simulate electronics noise in a simple fashion:
 
 ```julia
-noise = rand!(Normal(0,5e3), similar(flatview(waveforms_with_baseline)))
-noisy_waveforms = nestedview(flatview(waveforms_with_baseline) .+ noise)
-plot(noisy_waveforms[1:100], legend = false)
+noise = map( wf -> rand!(Normal(0, 5e3), similar(wf)), waveforms_with_baseline_and_tail.value)
+noisy_waveforms = ArrayOfRDWaveforms(
+    map(
+        wf -> RDWaveform(wf.time, wf.value .+ rand!(Normal(0, 5e3), similar(wf.value))),
+        waveforms_with_baseline_and_tail
+    )
+)
+plot(noisy_waveforms[1:100], legend = false, size = (900, 400))
 ```
 
 ## Waveform DSP
@@ -392,10 +378,10 @@ We can reconstruct a spectrum from the simulated waveforms, using the difference
 
 ```julia
 filter_length = 50
-pre_pulse_mean = vec(mean(flatview(noisy_waveforms)[1:filter_length, :], dims = 1))
-pre_pulse_std = vec(std(flatview(noisy_waveforms)[1:filter_length, :], dims = 1))
+pre_pulse_mean = mean.(map(signal -> signal[1:filter_length], noisy_waveforms.value))
+pre_pulse_std = std.(map(signal -> signal[1:filter_length], noisy_waveforms.value))
 energy_threshold = mean(pre_pulse_std) * 3
-post_pulse_mean = vec(mean(flatview(noisy_waveforms)[end-filter_length:end, :], dims = 1))
+post_pulse_mean = mean.(map(signal -> signal[end-filter_length:end], noisy_waveforms.value))
 E_reco = post_pulse_mean .- pre_pulse_mean
 hist_uncal = fit(Histogram, filter(e -> e > energy_threshold, E_reco), nbins = 2000)
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
@@ -414,4 +400,7 @@ hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
+```
+
+```julia
 ```
