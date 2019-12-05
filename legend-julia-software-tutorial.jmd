@@ -2,10 +2,6 @@
 This tutorial is licensed under the MIT License (MIT).
 
 ```julia
-println("Number of threads: $(Base.Threads.nthreads())")
-```
-
-```julia
 versioninfo()
 ```
 
@@ -31,6 +27,7 @@ using LegendTextIO
 <h1 style="text-align: center">
     LEGEND Software Stack Tutorial in <br/>
     <img alt="Julia" src="images/logos/julia-logo.svg" style="height: 2em; display: inline-block; margin: 1em;"/>
+    <img alt="Julia" src="images/logos/ssd_logo.svg" style="height: 2em; display: inline-block; margin: 1em;"/>
 </h1>
 
 <p style="text-align: center">
@@ -400,6 +397,18 @@ hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
+```
+
+```julia
+```
+
+```julia
+```
+
+```julia
+```
+
+```julia
 ```
 
 ```julia
