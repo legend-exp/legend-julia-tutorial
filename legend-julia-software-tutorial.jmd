@@ -7,7 +7,6 @@ versioninfo()
 
 ```julia
 # Load required Julia packages:
-using Random
 using Plots; pyplot();
 
 using ArraysOfArrays, StaticArrays, Tables, TypedTables
@@ -26,8 +25,8 @@ using LegendTextIO
 
 <h1 style="text-align: center">
     LEGEND Software Stack Tutorial in <br/>
-    <img alt="Julia" src="images/logos/julia-logo.svg" style="height: 2em; display: inline-block; margin: 1em;"/>
-    <img alt="Julia" src="images/logos/ssd_logo.svg" style="height: 2em; display: inline-block; margin: 1em;"/>
+    <img alt="Julia" src="images/logos/julia-logo.svg" style="height: 4em; display: inline-block; margin: 1em;"/>
+    <img alt="Julia" src="images/logos/ssd_logo.svg" style="height: 4em; display: inline-block; margin: 1em;"/>
 </h1>
 
 <p style="text-align: center">
@@ -36,10 +35,9 @@ using LegendTextIO
     Martin&nbsp;Schuster&nbsp;&lang;<a href="mailto:schuster@mpp.mpg.de" target="_blank">schuster@mpp.mpg.de</a>&rang;,
     Anna&nbsp;Julia&nbsp;Zsigmond&nbsp;&lang;<a href="azsigmon@mpp.mpg.de" target="_blank">azsigmon@mpp.mpg.de</a>&rang;
 </p>
-
-<div style="margin-top:1em">
+<div style="margin-top:0.0em">
     <p style="text-align: center">
-        <img alt="LEGEND Logo" src="images/logos/legend-logo.svg" style="height: 10em; display: inline-block; margin: 1em;"/>
+        <img alt="LEGEND Logo" src="images/logos/legend-logo.svg" style="height: 20em; display: inline-block; margin: 0em;"/>
     </p>
 </div>
 
@@ -53,7 +51,7 @@ First, load a detector definition - here, an inverted-coaxial example detector d
 
 ```julia
 detector_config_filename = SSD_examples[:InvertedCoax]
-T = Float64 # Optional; Default is Float32, but works with Float64 as well
+T = Float32 # Optional; Default is Float32, but works with Float64 as well
 simulation = Simulation{T}(detector_config_filename)
 plot(simulation.detector, size = (700, 700))
 ```
@@ -61,6 +59,9 @@ plot(simulation.detector, size = (700, 700))
 One can also have a look at how the initial conditions look like on the grid (its starts with a very coarse grid):
 
 ```julia
+# This is optional. Its only to have a look at the initial state. 
+# For example, if you want to check if you specified the detector 
+# geometry correctly in you .json config file.
 apply_initial_state!(simulation, ElectricPotential) # optional 
 plot(
     plot(simulation.electric_potential), # initial electric potential (boundary conditions)
@@ -131,6 +132,21 @@ Calculate the electric field of the fully depleted detector, given the already c
 
 ```julia
 calculate_electric_field!(simulation, n_points_in_φ = 72)
+calculate_electric_field!(simulation_undep, n_points_in_φ = 72)
+```
+
+### Detector Capacitance
+
+After the electric field is calculated one can determine the detector capacitance:
+
+```julia
+calculate_capacitance(simulation)
+```
+
+Note: This value seems to be a bit high for an inverted coax detector. However, this is because the impurity density defined for this example detector is higher than for a real detector. If the bias voltage is increased (or the impurity density is set to 0) the capacity converges to its lower limit which is basically only defined through the geometry and material.
+
+```julia
+calculate_capacitance(simulation_undep)
 ```
 
 ### Drift field calculation
@@ -213,6 +229,8 @@ simulation
 ```
 
 # Quick Simulation
+
+All the above steps, which offer more fine control over the individual steps, can be done with one function, `simulate!`. This can be useful if one just want to quickly test the config file for a new detector.
 
 ```julia
 quick_sim = Simulation{T}(detector_config_filename)
@@ -384,22 +402,26 @@ hist_uncal = fit(Histogram, filter(e -> e > energy_threshold, E_reco), nbins = 2
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
 ```
 
+```julia
+println(hist_uncal)
+```
+
 ## Spectrum analysis
 
 The package RadiationSpectra.jl provides a mechanism finding peaks in the spectrum. It can also auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:
 
 ```julia
 gamma_lines = [510.77, 583.191, 2614.533] 
-h_cal, h_deconv, peakPositions, threshold, c, c_precal = RadiationSpectra.calibrate_spectrum(hist_uncal, gamma_lines, threshold = 0.5, σ = 1) #, min_n_peaks = 10, α = 0.1, rtol = 0.1)
+
+h_cal, h_deconv, peakPositions, threshold, c, c_precal = RadiationSpectra.calibrate_spectrum(
+    hist_uncal, gamma_lines)
+
 p_uncal = plot(hist_uncal, st=:step, label = "uncalibrated spectrum", tickfontsize = 12, legendfontsize = 12)
 p_deconv = plot(h_deconv, st=:step, label = "deconvoluted spectrum", tickfontsize = 12, legendfontsize = 12)
 hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
-```
-
-```julia
 ```
 
 ```julia
