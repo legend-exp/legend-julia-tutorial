@@ -68,10 +68,10 @@ Download this tutorial via `Git`, then run the included Julia script "install_ju
 ```shell
 git clone https://github.com/legend-exp/legend-julia-tutorial.git
 cd legend-julia-tutorial
-julia install_julia_packages.jl
+julia --color=yes activate_and_instantiate_env.jl
 ```
 
-Julia has a very powerful [package management system](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html) that allows for using different versions of packages for different projects, layered package environments, etc. The above script will simply install all packages required for this tutorial into the default environment, so they will always available when you start Julia with default options.
+Julia has a very powerful [package management system](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html) that allows for using different versions of packages for different projects, layered package environments, etc. The above script will simply install all packages required for this tutorial into the Julia environment in this folder. The packages, and their specific versions, are specified in the `Project.toml` and `Manifest.toml` files. If you want to install the packages also to your main Julia environment execute the line `julia install_julia_packages.jl`.
 
 The tutorial is based on the included Markdown file with embedded Julia code "legend-julia-software-tutorial.md", from which a Jupyter notebook "legend-julia-software-tutorial.ipynb" and a plain Julia script "legend-julia-software-tutorial.jl" can be generated. To generate all tutorial files, run
 
