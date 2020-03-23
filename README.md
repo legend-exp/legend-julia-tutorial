@@ -76,7 +76,7 @@ Julia has a very powerful [package management system](https://docs.julialang.org
 The tutorial is based on the included Markdown file with embedded Julia code "legend-julia-software-tutorial.md", from which a Jupyter notebook "legend-julia-software-tutorial.ipynb" and a plain Julia script "legend-julia-software-tutorial.jl" can be generated. To generate all tutorial files, run
 
 ```shell
-julia make.jl
+julia --project=. make.jl
 ```
 
 
@@ -118,10 +118,10 @@ Note: We haven't tested this variant as well as using Jupyter, use at your own r
 
 The file "legend-julia-software-tutorial.jmd" is a human-readable Markdown document with embedded Julia code sections. You can use the Julia package [Weave.jl](https://github.com/mpastell/Weave.jl) to run the embedded code and generate a report (with embedded plots) from it in various formats (PDF, HTML, LaTeX, etc.). The result is similar to a Jupyter notebook converted to such an output format.
 
-Start Julia
+Start Julia (with the tutorial environment)
 
 ```shell
-julia
+julia --project=.
 ```
 
 and (on the Julia console) run
