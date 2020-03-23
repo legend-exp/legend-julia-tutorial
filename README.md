@@ -29,29 +29,48 @@ Julia is easy to install:
 
 * You may want to add the Julia "bin" directory to your `$PATH"`
 
+Please use Julia v1.4 or later to run this tutorial.
 
-#### Installing Jupyter and PyPlot
 
-Julia can either use existing installations of Jupyter and PyPlot (OS native or [Anaconda](https://www.anaconda.com/)), or install both internally by creating an internal Conda installation within "$HOME/.julia/conda". We recommend the first approach (especially using Anaconda), since Julia will otherwise have to download over 1 GB of software, the "$HOME/.julia" directory will grow very large, and Jupyter will have to be started in an indirect fashion via Julia (to then start other Julia instances as Jupyter kernels in return).
+#### Installing Jupyter and matplotlib/pyplot
 
-For details, see the [PyCall.jl](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version), [IJulia.jl](https://github.com/JuliaLang/IJulia.jl#installation) and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl) documentation (you should not need to refer to that documentation if you follow the steps below).
+Julia can either use existing installations of Jupyter and pyplot, or install both internally by creating an internal Conda installation within `$HOME/.julia/conda`. We recommend the first approach (especially using Anaconda), since Julia will otherwise have to download over 1 GB of software, the `$HOME/.julia` directory will grow very large, and you will need to start Jupyter in an indirect fashion via Julia (only to have Jupyter then start additional Julia instances as Jupyter kernels in return).
 
-On Linux, Julia (more specifically the Julia packages [IJulia.jl](https://github.com/JuliaLang/IJulia.jl), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl), and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl)) will by default try to use the matplotlib/PyPlot installation associated with the "python3" (resp. "python") executable on your "$PATH". Likewise, Julia will by default try to use the Jupyter installation associated with the "jupyter" executable on your "$PATH".
+For details, see the [IJulia.jl](https://github.com/JuliaLang/IJulia.jl#installation), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl) documentation (you should not need to if you follow the steps below).
 
-However, on OS-X and Windows, both IJulia.jl and PyCall.jl by default always create a Julia-internal Conda installation (see above), even if Jupyter and matplotlib/PyPlot are available (apparently broken Jupyter/Python installations on these platforms caused frequent support requests). 
+On Linux, Julia (more specifically the Julia packages [IJulia.jl](https://github.com/JuliaLang/IJulia.jl), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl), and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl)) will by default try to use the matplotlib/pyplot installation associated with the `python3` (resp. `python`) executable on your `$PATH`. Likewise, Julia will by default try to use the Jupyter installation associated with the `jupyter` executable on your `$PATH`.
 
-In contrast to this default behavior, we recommend to force IJulia.jl and PyCall.jl to use an existing external Jupyter and Python installation on all OS platforms. Do to this, you need to set the environment variables `.$JUPYTER` and `$PYTHON`. Run the `julia system_check.jl` to verify that things are set up correctly.script (see below) does *not* follow these default. To install Jupyter and matplotlib/PyPlot we recommend that you install Anaconda (especially on on OS-X and Windows) before doing so, and to make sure the Python and Jupyter programs provided by Anaconda are on your `$PATH` (default on OS-X, installer option on Windows). As an additional benefit, you gain a complete standalone Python environment that can also be used for LEGEND Python projects like [pygamma](https://github.com/wisecg/pygama).
+However, on OS-X and Windows, both IJulia.jl and PyCall.jl by default always create a Julia-internal Conda installation (see above), even if Jupyter and matplotlib/pyplot are available (apparently broken Jupyter/Python installations on these platforms caused frequent support requests).  In contrast to this default behavior, we recommend to use a standalone Jupyter and Python installation on all OS platforms. Set the environment variables [`$JUPYTER`](https://github.com/JuliaLang/IJulia.jl#installation) and [`$PYTHON`](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) to point to your Jupyter and Python executable to force Julia to use the existing installation.
+
+We recommend that you install the [Anaconda](https://www.anaconda.com/) Python distribution, it includes both Jupyter and pyplot (it is of course possible to use non-Anaconda Jupyter and pyplot installations instead).
 
 
 #### Installing Anaconda
 
 To install Anaconda
 
-* [Download Anaconda](https://www.anaconda.com/download/).
+* [Download Anaconda](https://www.anaconda.com/distribution/).
 
 * Run the installer
 
-* Either ensure that the programs "jupyter" and "python3" (resp. "python") are on your `$PATH` (manually on Linux, by default on OS-X, installer option on Windows), or manually set the environment variables "$JUPYTER" and "$PYTHON" to the full path of the programs (see above).
+* Set the environment variables [`$JUPYTER`](https://github.com/JuliaLang/IJulia.jl#installation) and [`$PYTHON`](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) to the full path of the Jupyter and Python executables (see above).
+
+* Note: OS-X => v1.15 ("Catalina") by default uses the "zsh" shell instead of "bash". However, the Anaconda installer (at least in some versions) still seems to add add it's `$PATH` settings to "$HOME/.bash_profile", instead of "$HOME/.zshrc". You may have to copy the Anaconda-related section to the correct file.
+
+
+#### Environment variables
+
+You may want/need to set the following environment variables:
+
+* `$PATH`: Include the Julia `bin`-directory in your binary search path, see above.
+If you intend to use Jupyter, you will probably want to include the directory containing the `jupyter` binary to your `PATH` as well.
+
+
+* [`$JULIA_NUM_THREADS`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS-1): Number of threads to use for Julia multi-threading
+
+* [`$JULIA_DEPOT_PATH`](https://julialang.github.io/Pkg.jl/v1/glossary/) and [`JULIA_PKG_DEVDIR`](https://julialang.github.io/Pkg.jl/v1/managing-packages/#Developing-packages-1): If you want Julia to install packages in another location than `$HOME/.julia`.
+
+See the Julia manual for a description of [other Julia-specific environment variables](https://docs.julialang.org/en/v1/manual/environment-variables/).
 
 
 ## Setting up the tutorial and installation of required Julia packages
