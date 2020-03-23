@@ -7,7 +7,7 @@ Note: This is a work in progress, more functionality will be added over time. Th
 
 ## Required Software
 
-The tutorial requires [Jupyter](https://jupyter.org/), [matplotlib/PyPlot](https://matplotlib.org/) and [HDF5](https://www.hdfgroup.org/) in addition to Julia. You may either use the LEGEND base software container image, or install Julia, Jupyter and PyPlot locally on your native OS. The installation instructions below are somewhat lengthy, to cover a variety of situations on Linux, OS-X and Windows, but the actual installation is typically quite simple.
+The tutorial requires [Jupyter](https://jupyter.org/) and [matplotlib/PyPlot](https://matplotlib.org/). You may either use the LEGEND base software container image, or install Julia, Jupyter and PyPlot locally on your native OS. The installation instructions below are somewhat lengthy, to cover a variety of situations on Linux, OS-X and Windows, but the actual installation is typically quite simple.
 
 
 ### Using the LEGEND software container image
@@ -52,13 +52,6 @@ To install Anaconda
 * Run the installer
 
 * Either ensure that the programs "jupyter" and "python3" (resp. "python") are on your `$PATH` (manually on Linux, by default on OS-X, installer option on Windows), or manually set the environment variables "$JUPYTER" and "$PYTHON" to the full path of the programs (see above).
-
-
-#### Installing HDF5
-
-Julia bindings for HDF5 are provided by the package [HDF5.jl](https://github.com/JuliaIO/HDF5.jl), but HDF5.jl requires the HDF5 C-libraries to be installed.
-
-On Linux, install the HD5 system package provided by your distribution. On OS-X, if Julia fails to automatically install HDF5 internally via [Homebrew.jl](https://github.com/JuliaPackaging/Homebrew.jl), install HDF5 manually via [Homebrew](https://brew.sh/). On Windows, HDF5.jl should automatically install a version of the HDF5 libraries internally.
 
 
 ## Setting up the tutorial and installation of required Julia packages
