@@ -39,3 +39,8 @@ TypedTables = "9d95f2ec-7b3d-5a63-8d20-e2491e220bb9"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
+
+[compat]
+RadiationDetectorSignals = "0.1"
+RadiationSpectra = "0.3"
+SolidStateDetectors = "0.4"
