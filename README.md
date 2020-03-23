@@ -73,22 +73,27 @@ If you intend to use Jupyter, you will probably want to include the directory co
 See the Julia manual for a description of [other Julia-specific environment variables](https://docs.julialang.org/en/v1/manual/environment-variables/).
 
 
-## Setting up the tutorial and installation of required Julia packages
+## Setting up the tutorial and installing the required Julia packages
 
-Download this tutorial via `Git`, then run the included Julia script "install_julia_packages.jl" to automatically install all required Julia packages:
+Download this tutorial via `Git` and change into the "legend-julia-tutorial" directory:
 
 ```shell
 git clone https://github.com/legend-exp/legend-julia-tutorial.git
 cd legend-julia-tutorial
+```
+
+Julia has a very powerful [package management system](https://julialang.github.io/Pkg.jl/v1/) that allows for using different versions of packages for different projects, layered package environments, etc. Run the shell command
+
+```
 julia --project=. --color=yes -e 'using Pkg; pkg"instantiate; precompile"'
 ```
 
-Julia has a very powerful [package management system](https://julialang.github.io/Pkg.jl/v1/) that allows for using different versions of packages for different projects, layered package environments, etc. The command above will activate and instantiate the [Julia project environment](https://docs.julialang.org/en/v1/manual/code-loading/#Project-environments-1) defined by the
+to instantiate the [Julia project environment](https://docs.julialang.org/en/v1/manual/code-loading/#Project-environments-1) defined by the
 files "Project.toml" and "Manifest.toml" in the "legend-julia-tutorial" directory.
 
-To make this environment available generally, independent of your current directory, create a directory "$HOME/user/.julia/environments/legend" and copy both "Project.toml" and "Manifest.toml" into that directory. Afterwards, you'll be able to activate the "legend" environment via [`activate --shared legend`](https://julialang.github.io/Pkg.jl/v1/api/#Pkg.activate) on the Julia package management console (which you can enter by pressing `]` in Julia).
+Optional: To make this environment available generally, independent of your current directory, create a directory "$HOME/user/.julia/environments/legend" and copy both "Project.toml" and "Manifest.toml" into that directory. Afterwards, you'll be able to activate the "legend" environment via [`activate --shared legend`](https://julialang.github.io/Pkg.jl/v1/api/#Pkg.activate) on the Julia package management console (which you can enter by pressing `]` in Julia).
 
-Of course you may also istall the required packages (listed in "Project.toml") into your default julia environment (located in "$HOME/user/.julia/environments/v1.4"), the packages in the default environment are always available in Julia.
+Optional: Of course you may also istall the required packages (listed in "Project.toml") into your default julia environment (located in "$HOME/user/.julia/environments/v1.4"), the packages in the default environment are always available in Julia.
 
 The tutorial is based on the included Markdown file with embedded Julia code "legend-julia-software-tutorial.md", from which a Jupyter notebook "legend-julia-software-tutorial.ipynb" and a plain Julia script "legend-julia-software-tutorial.jl" can be generated. To generate all tutorial files, run
 
