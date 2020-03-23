@@ -68,7 +68,7 @@ Download this tutorial via `Git`, then run the included Julia script "install_ju
 ```shell
 git clone https://github.com/legend-exp/legend-julia-tutorial.git
 cd legend-julia-tutorial
-julia --color=yes activate_and_instantiate_env.jl
+julia --project=. --color=yes -e 'using Pkg; pkg"instantiate; precompile"'
 ```
 
 Julia has a very powerful [package management system](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html) that allows for using different versions of packages for different projects, layered package environments, etc. The above script will simply install all packages required for this tutorial into the Julia environment in this folder. The packages, and their specific versions, are specified in the `Project.toml` and `Manifest.toml` files. If you want to install the packages also to your main Julia environment execute the line `julia install_julia_packages.jl`.
