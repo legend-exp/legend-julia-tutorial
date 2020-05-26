@@ -438,9 +438,9 @@ version = "1.10.5+5"
 
 [[HTTP]]
 deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets"]
-git-tree-sha1 = "fe31f4ff144392ad8176f5c7c03cca6ba320271c"
+git-tree-sha1 = "ec87d5e2acbe1693789efbbe14f5ea7525758f71"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.8.14"
+version = "0.8.15"
 
 [[Highlights]]
 deps = ["DocStringExtensions", "InteractiveUtils", "REPL"]
@@ -496,9 +496,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[Interpolations]]
 deps = ["AxisAlgorithms", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "3af735234d9b1ff9ff1af89875735cd9549c0c5f"
+git-tree-sha1 = "2b7d4e9be8b74f03115e64cf36ed2f48ae83d946"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.12.9"
+version = "0.12.10"
 
 [[IntervalSets]]
 deps = ["Dates", "EllipsisNotation", "Statistics"]
@@ -508,9 +508,9 @@ version = "0.4.0"
 
 [[Intervals]]
 deps = ["Dates", "Printf", "RecipesBase", "TimeZones"]
-git-tree-sha1 = "5e9938f4dff72e5ed4c0f7fbe34b204cbabcf43a"
+git-tree-sha1 = "11555ad4a66a93e2268364f2ea11139634f9dda3"
 uuid = "d8418881-c3e1-53bb-8760-2df7ec849ed5"
-version = "1.1.0"
+version = "1.2.0"
 
 [[InvertedIndices]]
 deps = ["Test"]
@@ -839,9 +839,9 @@ version = "0.29.9"
 
 [[Polynomials]]
 deps = ["Intervals", "LinearAlgebra", "RecipesBase"]
-git-tree-sha1 = "111ec00e7638bdd1a64e0cfb876fbf0e9c51a3b5"
+git-tree-sha1 = "05f4b8b55595b86b252b28fb1e7c402fb4df98d2"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
-version = "1.1.0"
+version = "1.1.1"
 
 [[PooledArrays]]
 deps = ["DataAPI"]
