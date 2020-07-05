@@ -1,6 +1,5 @@
 [deps]
 ArraysOfArrays = "65a8f2f4-9b39-5baf-92e2-a9cc46fdf018"
-BAT = "c0cd4b16-88b7-57fa-983b-ab80aecada7e"
 BufferedStreams = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
