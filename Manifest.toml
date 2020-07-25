@@ -573,9 +573,9 @@ version = "0.10.0"
 
 [[Lz4_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "e1a93171a400d4578193eaa39edd2d3f5db08fb6"
+git-tree-sha1 = "51b1db0732bbdcfabb60e36095cc3ed9c0016932"
 uuid = "5ced341a-0733-55b8-9ab6-a4889d929147"
-version = "1.9.2+0"
+version = "1.9.2+2"
 
 [[MKL_jll]]
 deps = ["IntelOpenMP_jll", "Libdl", "Pkg"]
@@ -716,6 +716,12 @@ deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
 git-tree-sha1 = "2fc6f50ddd959e462f0a2dbc802ddf2a539c6e35"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.9.12"
+
+[[PackageCompiler]]
+deps = ["Libdl", "Pkg", "UUIDs"]
+git-tree-sha1 = "98aa9c653e1dc3473bb5050caf8501293db9eee1"
+uuid = "9b87118b-4619-50d2-8e1e-99f35a4d4d9d"
+version = "1.2.1"
 
 [[ParallelProcessingTools]]
 deps = ["Distributed"]
