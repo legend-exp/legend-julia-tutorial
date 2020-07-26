@@ -24,7 +24,7 @@ open("legend-julia-software-tutorial.jl", "w") do f; write(f, script); end
 
 import PackageCompiler, Libdl
 
-custom_sysimg = joinpath(orig_pwd, "legend_julia_sysimage." * Libdl.dlext)
+custom_sysimg = joinpath(orig_pwd, "julia_sysimage." * Libdl.dlext)
 
 PackageCompiler.create_sysimage(
     Symbol.(keys(Pkg.project().dependencies)),
