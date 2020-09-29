@@ -24,7 +24,7 @@ open("legend-julia-software-tutorial.jl", "w") do f; write(f, script); end
 
 import PackageCompiler, Libdl
 
-custom_sysimg = joinpath(orig_pwd, "julia_sysimage." * Libdl.dlext)
+custom_sysimg = joinpath(orig_pwd, "JuliaSysimage." * Libdl.dlext)
 
 PackageCompiler.create_sysimage(
     Symbol.(keys(Pkg.project().dependencies)),
@@ -33,15 +33,15 @@ PackageCompiler.create_sysimage(
     cpu_target=PackageCompiler.default_app_cpu_target()
 )
 
-default_sysimg = abspath(Sys.BINDIR, "..", "lib", "julia", "sys." * Libdl.dlext)
 
+default_sysimg = abspath(Sys.BINDIR, "..", "lib", "julia", "sys." * Libdl.dlext)
 
 import Markdown
 
 show(Markdown.parse("
 LEGEND Julia system image created.
 
-Default Julia system image is \"$default_sysimg\", to use LEGEND Julia system image, run
+Default Julia system image is \"$default_sysimg\", to start Julia with the LEGEND environment and system image, use
 
 ```shell
 julia --project=\"$orig_pwd\" --sysimage=\"$custom_sysimg\"
@@ -54,5 +54,11 @@ julia> import IJulia
 julia> IJulia.installkernel(\"LEGEND Julia\", \"--project=$orig_pwd\", \"--sysimage=$custom_sysimg\")
 ```
 
-to install a Jupyter kernel that will use the LEGEND Julia system image.
+to install a Jupyter Julia kernel that will use the LEGEND environment and system image.
+
+To check which system image is active in a Julia session, use
+
+```
+julia> Base.JLOptions().image_file |> unsafe_string
+```
 "))

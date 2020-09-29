@@ -174,6 +174,42 @@ Some output formats will require additional software (e.g. certain LaTeX package
 You can also run the script "legend-julia-software-tutorial.jl" directly. However, plots will constantly be replaced by the next plot and no output will be saved. The Julia script is more useful as a starting point for advanced users who want to start developing their own scripts.
 
 
+### Building a custom Julia LEGEND system image
+
+The LEGEND Julia packages and their dependencies constitute a large code base,
+using them the first time in a new Julia session takes a while (each time).
+To reduce this startup latency (due to package loading and code-generation
+time), you can build a custom Julia system image that includes almost all of
+the packages used in the LEGEND Julia tutorial via
+[PackageCompiler.jl](https://julialang.github.io/PackageCompiler.jl/dev/).
+
+Run
+
+```shell
+julia --project=. build_sysimage.jl
+```
+
+to build the custom Julia LEGEND system image and
+
+```shell
+julia --project="/path/to/this/legend-julia-tutorial" --sysimage="/path/to/legend-julia-tutorial/JuliaSysimage.so"
+```
+
+to use it. Note: The file name of the system image file is OS-dependent:
+on Linux it is "JuliaSysimage.so", on OS-X it is "JuliaSysimage.dylib",
+and on Windows it is "JuliaSysimage.dll".
+
+Also note that using a custom Julia system image freezes all included packages
+and all their transitive dependencies to the package version used when
+generating the image. While the custom system image is used, none of these
+Julia packages can be updated.
+
+If you activate the "legend-julia-tutorial" project/environment in the
+[Julia plugin for Visual Studio Code](https://www.julia-vscode.org/),
+you may want to enable the `"julia.useCustomSysimage"` option to
+[use the custom system image automatically](https://www.julia-vscode.org/docs/stable/userguide/compilesysimage/).
+
+
 ## Learning (more about) Julia
 
 If you're interesting in learning Julia, or just learning more about Julia, the [Julia website](https://julialang.org/) provides many [links to introductory videos and written tutorials](https://julialang.org/learning/), e.g. ["Intro to Julia"](https://www.youtube.com/watch?v=fMa1qSg_LxA),
