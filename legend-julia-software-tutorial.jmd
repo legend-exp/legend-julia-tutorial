@@ -7,7 +7,7 @@ versioninfo()
 
 ```julia
 # Load required Julia packages:
-using Plots; pyplot();
+using Plots
 
 using ArraysOfArrays, StaticArrays, Tables, TypedTables
 using Statistics, Random, Distributions, StatsBase
