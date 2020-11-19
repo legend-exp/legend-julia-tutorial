@@ -7,17 +7,17 @@ Note: This is a work in progress, more functionality will be added over time. Th
 
 ## Required Software
 
-The tutorial requires [Jupyter](https://jupyter.org/) and [matplotlib/PyPlot](https://matplotlib.org/). You may either use the LEGEND base software container image, or install Julia, Jupyter and PyPlot locally on your native OS. The installation instructions below are somewhat lengthy, to cover a variety of situations on Linux, OS-X and Windows, but the actual installation is typically quite simple.
+The tutorial requires [Jupyter](https://jupyter.org/). You may either use the LEGEND base software container image, or install Julia and Jupyter locally on your native OS. The installation instructions below are somewhat lengthy, to cover a variety of situations on Linux, OS-X and Windows, but the actual installation is typically quite simple.
 
 
 ### Using the LEGEND software container image
 
 The easiest way to ensure that all required software is available is to use the [LEGEND base software container](https://github.com/legend-exp/legendexp_legend-base_img) (see the link for instructions).
 
-When using the container image, you can skip the complete section "Installing Julia, Jupyter and PyPlot locally on your native OS".
+When using the container image, you can skip the complete section "Installing Julia and Jupyter locally on your native OS".
 
 
-### Installing Julia, Jupyter and PyPlot locally on your native OS
+### Installing Julia and Jupyter locally on your native OS
 
 #### Installing Julia
 
@@ -32,17 +32,17 @@ Julia is easy to install:
 Please use Julia v1.4 or later to run this tutorial.
 
 
-#### Installing Jupyter and matplotlib/pyplot
+#### Installing Jupyter
 
-Julia can either use existing installations of Jupyter and pyplot, or install both internally by creating an internal Conda installation within `$HOME/.julia/conda`. We recommend the first approach (especially using Anaconda), since Julia will otherwise have to download over 1 GB of software, the `$HOME/.julia` directory will grow very large, and you will need to start Jupyter in an indirect fashion via Julia (only to have Jupyter then start additional Julia instances as Jupyter kernels in return).
+Julia can either use existing installations of Jupyter, or install it internally by creating an internal Conda installation within `$HOME/.julia/conda`. We recommend the first approach (especially using Anaconda), since Julia will otherwise have to download over 1 GB of software, the `$HOME/.julia` directory will grow very large, and you will need to start Jupyter in an indirect fashion via Julia (only to have Jupyter then start additional Julia instances as Jupyter kernels in return).
 
-For details, see the [IJulia.jl](https://github.com/JuliaLang/IJulia.jl#installation), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl) documentation (you should not need to if you follow the steps below).
+For details, see the [IJulia.jl](https://github.com/JuliaLang/IJulia.jl#installation), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) documentation (you should not need to if you follow the steps below).
 
-On Linux, Julia (more specifically the Julia packages [IJulia.jl](https://github.com/JuliaLang/IJulia.jl), [PyCall.jl](https://github.com/JuliaPy/PyCall.jl), and [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl)) will by default try to use the matplotlib/pyplot installation associated with the `python3` (resp. `python`) executable on your `$PATH`. Likewise, Julia will by default try to use the Jupyter installation associated with the `jupyter` executable on your `$PATH`.
+On Linux, Julia (more specifically the Julia package [IJulia.jl](https://github.com/JuliaLang/IJulia.jl)) will by default try to use the Jupyter installation associated with the `jupyter` executable on your `$PATH`.
 
-However, on OS-X and Windows, both IJulia.jl and PyCall.jl by default always create a Julia-internal Conda installation (see above), even if Jupyter and matplotlib/pyplot are available (apparently broken Jupyter/Python installations on these platforms caused frequent support requests).  In contrast to this default behavior, we recommend to use a standalone Jupyter and Python installation on all OS platforms. Set the environment variables [`$JUPYTER`](https://github.com/JuliaLang/IJulia.jl#installation) and [`$PYTHON`](https://github.com/JuliaPy/PyCall.jl#specifying-the-python-version) to point to your Jupyter and Python executable to force Julia to use the existing installation.
+However, on OS-X and Windows, IJulia.jl by default always creates a Julia-internal Conda installation (see above), even if Jupyter is available (apparently broken Jupyter installations on these platforms caused frequent support requests).  In contrast to this default behavior, we recommend to use a standalone Jupyter installation on all OS platforms. Set the environment variables [`$JUPYTER`](https://github.com/JuliaLang/IJulia.jl#installation) to point to your Jupyter and Python executable to force Julia to use the existing installation.
 
-We recommend that you install the [Anaconda](https://www.anaconda.com/) Python distribution, it includes both Jupyter and pyplot (it is of course possible to use non-Anaconda Jupyter and pyplot installations instead).
+We recommend that you install the [Anaconda](https://www.anaconda.com/) Python distribution, it includes Jupyter (it is of course possible to use non-Anaconda Jupyter installations instead).
 
 
 #### Installing Anaconda

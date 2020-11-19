@@ -9,7 +9,6 @@ cd(tmpprjdir)
 
 import Pkg
 Pkg.activate(".")
-Pkg.rm("PyPlot")
 Pkg.instantiate()
 Pkg.precompile()
 
@@ -18,8 +17,6 @@ include("make.jl")
 script = read("legend-julia-software-tutorial.jl", String)
 # Remove versioninfo() from tutorial, causes trouble for PackageCompiler:
 script = replace(script, "versioninfo()" => "")
-# PackageCompiler doesn't seem to like Plots with pyplot():
-script = replace(script, "pyplot()" => "")
 open("legend-julia-software-tutorial.jl", "w") do f; write(f, script); end
 
 import PackageCompiler, Libdl
