@@ -30,6 +30,7 @@ using LegendTextIO
 </h1>
 
 <p style="text-align: center">
+    Felix&nbsp;Hagemann&nbsp;&lang;<a href="mailto:hagemann@mpp.mpg.de" target="_blank">hagemann@mpp.mpg.de</a>&rang;,
     Lukas&nbsp;Hauertmann&nbsp;&lang;<a href="mailto:lhauert@mpp.mpg.de" target="_blank">lhauert@mpp.mpg.de</a>&rang;,
     Oliver&nbsp;Schulz&nbsp;&lang;<a href="mailto:oschulz@mpp.mpg.de" target="_blank">oschulz@mpp.mpg.de</a>&rang;,
     Martin&nbsp;Schuster&nbsp;&lang;<a href="mailto:schuster@mpp.mpg.de" target="_blank">schuster@mpp.mpg.de</a>&rang;,
@@ -56,7 +57,7 @@ simulation = Simulation{T}(detector_config_filename)
 plot(simulation.detector, size = (700, 700))
 ```
 
-One can also have a look at how the initial conditions look like on the grid (its starts with a very coarse grid):
+One can also have a look at how the initial conditions look like on the grid (it starts with a very coarse grid):
 
 ```julia
 # This is optional. Its only to have a look at the initial state. 
@@ -68,7 +69,7 @@ plot(
     plot(simulation.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
     plot(simulation.ρ), # charge density distribution
     plot(simulation.ϵ), # dielectric distribution
-    layout = (1, 4), size = (1400, 700)
+    layout = (1, 4), size = (1600, 500)
 )
 ```
 
@@ -85,7 +86,7 @@ plot(
     plot(simulation.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
     plot(simulation.ρ), # charge density distribution
     plot(simulation.ϵ), # dielectric distribution
-    layout = (1, 4), size = (1400, 700)
+    layout = (1, 4), size = (1600, 500)
 )
 ```
 
@@ -135,15 +136,20 @@ calculate_electric_field!(simulation, n_points_in_φ = 72)
 calculate_electric_field!(simulation_undep, n_points_in_φ = 72)
 ```
 
-### Detector Capacitance
+```julia
+plot(simulation.electric_field, clims = (0,1e6), size = (400,700))
+plot_electric_fieldlines!(simulation)
+```
 
-After the electric field is calculated one can determine the detector capacitance:
+### Detector capacitance
+
+After the electric field is calculated, one can determine the detector capacitance:
 
 ```julia
 calculate_capacitance(simulation)
 ```
 
-Note: This value seems to be a bit high for an inverted coax detector. However, this is because the impurity density defined for this example detector is higher than for a real detector. If the bias voltage is increased (or the impurity density is set to 0) the capacity converges to its lower limit which is basically only defined through the geometry and material.
+Note: This value seems to be a bit high for an inverted coax detector. However, this is because the impurity density defined for this example detector is higher than for a real detector. If the bias voltage is increased (or the impurity density is set to 0), the capacity converges to its lower limit which is basically only defined through the geometry and material.
 
 ```julia
 calculate_capacitance(simulation_undep)
@@ -151,12 +157,12 @@ calculate_capacitance(simulation_undep)
 
 ### Drift field calculation
 
-Given the electric field and a charge drift model, calculate drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation:
-
-And apply the charge drift model to the electric field:
+Given the electric field and a charge drift model, calculate the drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation.
 
 ```julia
-apply_charge_drift_model!(simulation)
+charge_drift_model = ADLChargeDriftModel(T=T)
+set_charge_drift_model!(simulation, charge_drift_model)
+calculate_drift_fields!(simulation)
 ```
 
 ### Weighting potential calculation
@@ -177,9 +183,9 @@ plot(
 )
 ```
 
-# Drift and Waveform Simulation
+# Drift and waveform simulation
 
-Now, let's create an "random" (multiside) event:
+Now, let's create an "random" (multisite) event:
 
 ```julia
 starting_positions = [ CylindricalPoint{T}( 0.020, deg2rad(10), 0.015 ), 
@@ -192,7 +198,7 @@ event = Event(starting_positions, energy_depos);
 
 ```julia
 time_step = 1u"ns"
-simulate!(event, simulation, Δt = time_step, max_nsteps = 2000)
+simulate!(event, simulation, Δt = time_step, max_nsteps = 1000)
 ```
 
 ```julia
@@ -201,14 +207,13 @@ plot!(event.drift_paths)
 ```
 
 ```julia
-p_pc_signal = plot( event.waveforms[1], lw = 1.5, xlims = (0, 2000), xlabel = "Time / ns",
+p_pc_signal = plot( event.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "Time / ns",
                     legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
 ```
 
 # I/O
 
-The package offeres a conversion of all the calculated fields to `NamedTuple`'s
-which allows for saving and loading them into HDF5 files via the LegendHDF5 package:
+The package offers a conversion of all the calculated fields to `NamedTuple`s which allows for saving and loading them into HDF5 files via the [LegendHDF5IO.jl](https://github.com/legend-exp/LegendHDF5IO.jl) package:
 
 ```julia
 simulation
@@ -224,11 +229,7 @@ SolidStateDetectors.ssd_write(filename, simulation)
 simulation = SolidStateDetectors.ssd_read(filename, Simulation)
 ```
 
-```julia
-simulation
-```
-
-# Quick Simulation
+# Quick simulation
 
 All the above steps, which offer more fine control over the individual steps, can be done with one function, `simulate!`. This can be useful if one just want to quickly test the config file for a new detector.
 
@@ -266,7 +267,7 @@ else
 end
 ```
 
-Producing pulse shapes from raw MC events is wastful, it's more efficient to cluster detectors hits (within a small radius) first:
+Producing pulse shapes from raw MC events is wasteful, it's more efficient to cluster detectors hits (within a small radius) first:
 
 ```julia
 println("$(sum(length.(mc_events.edep))) hits before clustering")
@@ -280,7 +281,7 @@ Table of MC events is of type `DetectorHitEvents`:
 typeof(mc_events_clustered) <: DetectorHitEvents
 ```
 
-We have a plotting reciple for `DetectorHitEvents`:
+We have a plotting recipe for `DetectorHitEvents`:
 
 ```julia
 plot(mc_events_clustered)
@@ -361,7 +362,7 @@ evt1 = Event(filtered_events[1], T)
 simulate!(evt1, simulation, max_nsteps = 4000, Δt = 1u"ns", verbose = true)
 p_drift = plot(simulation.detector)
 plot!(evt1.drift_paths)
-p_signal = plot(evt1.waveforms[1], lw = 2)
+p_signal = plot(evt1.waveforms[1], lw = 2, legend = false)
 plot(p_drift, p_signal, size = (1200, 600))
 ```
 
@@ -389,7 +390,7 @@ plot(noisy_waveforms[1:100], legend = false, size = (900, 400))
 
 Note: This section only demonstrates a very simple form of DSP for energy reconstruction, and will be extended in the near future.
 
-We can reconstruct a spectrum from the simulated waveforms, using the difference between the pre- and post-pulse baseline means energy of the events (equivalent to a triangular shaping filter in a fixed position):
+We can reconstruct a spectrum from the simulated waveforms, using the difference between the pre- and post-pulse baseline means as energy of the events (equivalent to a triangular shaping filter in a fixed position):
 
 ```julia
 filter_length = 50
@@ -408,7 +409,7 @@ println(hist_uncal)
 
 ## Spectrum analysis
 
-The package RadiationSpectra.jl provides a mechanism finding peaks in the spectrum. It can also auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:
+The package [RadiationSpectra.jl](https://github.com/JuliaPhysics/RadiationSpectra.jl) provides a mechanism finding peaks in the spectrum. It can also run an auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:
 
 ```julia
 gamma_lines = [510.77, 583.191, 2614.533] 
@@ -417,21 +418,9 @@ h_cal, h_deconv, peakPositions, threshold, c, c_precal = RadiationSpectra.calibr
     hist_uncal, gamma_lines)
 
 p_uncal = plot(hist_uncal, st=:step, label = "uncalibrated spectrum", tickfontsize = 12, legendfontsize = 12)
-p_deconv = plot(h_deconv, st=:step, label = "deconvoluted spectrum", tickfontsize = 12, legendfontsize = 12)
+p_deconv = plot(h_deconv, st=:step, label = "deconvolved spectrum", tickfontsize = 12, legendfontsize = 12)
 hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
-```
-
-```julia
 ```
