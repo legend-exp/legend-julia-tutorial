@@ -14,11 +14,6 @@ Pkg.precompile()
 
 include("make.jl")
 
-script = read("legend-julia-software-tutorial.jl", String)
-# Remove versioninfo() from tutorial, causes trouble for PackageCompiler:
-script = replace(script, "versioninfo()" => "")
-open("legend-julia-software-tutorial.jl", "w") do f; write(f, script); end
-
 import PackageCompiler, Libdl
 
 custom_sysimg = joinpath(orig_pwd, "JuliaSysimage." * Libdl.dlext)

@@ -2,10 +2,6 @@
 This tutorial is licensed under the MIT License (MIT).
 
 ```julia
-versioninfo()
-```
-
-```julia
 # Load required Julia packages:
 using Plots
 
