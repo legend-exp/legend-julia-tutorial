@@ -103,6 +103,12 @@ Note: To activate Julia's multi-threading support, set the environment variable 
 
 The Jupyter notebook version of the tutorial is probably the best starting point for most users.
 
+Running Julia in Jupyter requires the [IJulia Jupyter Julia kernel](https://github.com/JuliaLang/IJulia.jl). If you do *not* have added IJulia in your default environment (we recommend that you do), you can add IJulia to the "legend-julia-tutorial" project using
+
+julia --project=. -e 'using Pkg; Pkg.add("IJulia")'
+
+If you *do* have IJulia in your default environment then *don't* add it to "legend-julia-tutorial" as well.
+
 If you do *not* have a Jupyter installation on your `$PATH`, you may want to start [Jupyter via Julia](https://julialang.github.io/IJulia.jl/stable/manual/running/) or (on a desktop system) use [nteract](https://nteract.io/).
 
 If you *do* have a Jupyter installation on your `$PATH` (preferred), you can just usually start a [Jupyter notebook server](https://jupyter-notebook.readthedocs.io/en/stable/) using
