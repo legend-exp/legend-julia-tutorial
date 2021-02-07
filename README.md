@@ -105,7 +105,9 @@ The Jupyter notebook version of the tutorial is probably the best starting point
 
 Running Julia in Jupyter requires the [IJulia Jupyter Julia kernel](https://github.com/JuliaLang/IJulia.jl). If you do *not* have added IJulia in your default environment (we recommend that you do), you can add IJulia to the "legend-julia-tutorial" project using
 
+```shell
 julia --project=. -e 'using Pkg; Pkg.add("IJulia")'
+```
 
 If you *do* have IJulia in your default environment then *don't* add it to "legend-julia-tutorial" as well.
 
@@ -172,19 +174,25 @@ You can also run the script "legend-julia-software-tutorial.jl" directly. Howeve
 The LEGEND Julia packages and their dependencies constitute a large code base, using them the first time in a new Julia session takes a while (each time). To reduce this startup latency (due to package loading and code-generation
 time), you can build a custom Julia system image that includes almost all of the packages used in the LEGEND Julia tutorial via [PackageCompiler.jl](https://julialang.github.io/PackageCompiler.jl/dev/).
 
-Run
+If you do *not* have added PackageCompiler to your default environment (we recommend that you do), you can add PackageCompiler to the "legend-julia-tutorial" project using
+
+```shell
+julia --project=. -e 'using Pkg; Pkg.add("PackageCompiler")'
+```
+
+To build the custom Julia LEGEND system image, run
 
 ```shell
 julia --project=. build_sysimage.jl
 ```
 
-to build the custom Julia LEGEND system image and
+Afterwards, you can use
 
 ```shell
 julia --project="/path/to/this/legend-julia-tutorial" --sysimage="/path/to/legend-julia-tutorial/JuliaSysimage.so"
 ```
 
-to use it. Note: The file name of the system image file is OS-dependent: on Linux it is "JuliaSysimage.so", on OS-X it is "JuliaSysimage.dylib", and on Windows it is "JuliaSysimage.dll".
+to run Julia with the custom system image. Note: The file name of the system image file is OS-dependent: on Linux it is "JuliaSysimage.so", on OS-X it is "JuliaSysimage.dylib", and on Windows it is "JuliaSysimage.dll".
 
 Also note that using a custom Julia system image freezes all included packages and all their transitive dependencies to the package version used when generating the image. While the custom system image is used, none of these Julia packages can be updated. The system image will also only work for your current Julia version.
 

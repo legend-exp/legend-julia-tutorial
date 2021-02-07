@@ -941,12 +941,6 @@ git-tree-sha1 = "95a4038d1011dfdbde7cecd2ad0ac411e53ab1bc"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.10.1"
 
-[[PackageCompiler]]
-deps = ["Libdl", "Pkg", "UUIDs"]
-git-tree-sha1 = "d448727c4b86be81b225b738c88d30334fda6779"
-uuid = "9b87118b-4619-50d2-8e1e-99f35a4d4d9d"
-version = "1.2.5"
-
 [[ParallelProcessingTools]]
 deps = ["Distributed"]
 git-tree-sha1 = "b318c4aa7a975619c5031cd25f7d5cca175695f3"
