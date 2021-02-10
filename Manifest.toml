@@ -631,6 +631,14 @@ repo-url = "https://github.com/legend-exp/LegendDataTypes.jl.git"
 uuid = "99e09c13-5545-5ee2-bfa2-77f358fb75d8"
 version = "0.0.0"
 
+[[LegendGeSim]]
+deps = ["ArgCheck", "ArraysOfArrays", "Clustering", "Distributions", "ElasticArrays", "EncodedArrays", "FillArrays", "IntervalSets", "JSON", "LegendDataTypes", "LegendHDF5IO", "LinearAlgebra", "RadiationDetectorSignals", "RadiationSpectra", "Random", "Random123", "RecipesBase", "Requires", "SolidStateDetectors", "StaticArrays", "Statistics", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
+git-tree-sha1 = "62a890f2bc0f6088349d654edcaca6e46bf1cf0f"
+repo-rev = "master"
+repo-url = "https://github.com/legend-exp/LegendGeSim.jl.git"
+uuid = "e592b54b-af3c-468f-bcc7-10a913e293a7"
+version = "0.1.0"
+
 [[LegendHDF5IO]]
 deps = ["ArraysOfArrays", "ElasticArrays", "EncodedArrays", "HDF5", "LegendDataTypes", "RadiationDetectorSignals", "StaticArrays", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
 git-tree-sha1 = "5d5e411912d1ed03ea24da3fd1fe307f4a3485a7"
