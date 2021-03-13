@@ -28,7 +28,10 @@ custom_sysimg = joinpath(prj_dir, "JuliaSysimage." * Libdl.dlext)
 PackageCompiler.create_sysimage(
     Symbol.(keys(Pkg.project().dependencies)),
     sysimage_path = custom_sysimg,
-    precompile_execution_file = "legend-julia-software-tutorial.jl",
+    precompile_execution_file = [
+        "precompile_exec.jl",
+        "legend-julia-software-tutorial.jl",
+    ],
     cpu_target=PackageCompiler.default_app_cpu_target()
 )
 
