@@ -39,9 +39,9 @@ uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
-git-tree-sha1 = "f5cb35e4e2cbb488846d95b471f479be1ff6b173"
+git-tree-sha1 = "d84e8967b7f04f52c9bca21714bae54a553a53fc"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "3.1.9"
+version = "3.1.10"
 
 [[ArraysOfArrays]]
 deps = ["Adapt", "Requires", "Statistics", "UnsafeArrays"]
@@ -179,9 +179,9 @@ version = "0.3.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "ac4132ad78082518ec2037ae5770b6e796f7f956"
+git-tree-sha1 = "0a817fbe51c976de090aa8c997b7b719b786118d"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.27.0"
+version = "3.28.0"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -189,9 +189,9 @@ uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 
 [[Configurations]]
 deps = ["Crayons", "ExproniconLite", "OrderedCollections", "TOML"]
-git-tree-sha1 = "fecec31dbbe3d545d9036b07aa8d012dfa1ca487"
+git-tree-sha1 = "22f5e05d431a6f933f4de3740c9fc0991324438c"
 uuid = "5218b696-f38b-4ac9-8b61-a12ec717816d"
-version = "0.15.2"
+version = "0.15.3"
 
 [[ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -300,9 +300,9 @@ version = "0.24.18"
 
 [[DistributionsAD]]
 deps = ["Adapt", "ChainRules", "ChainRulesCore", "Compat", "DiffRules", "Distributions", "FillArrays", "LinearAlgebra", "NaNMath", "PDMats", "Random", "Requires", "SpecialFunctions", "StaticArrays", "StatsBase", "StatsFuns", "ZygoteRules"]
-git-tree-sha1 = "1d67d622c090c9422d6b3596846d2b3d088c5771"
+git-tree-sha1 = "d432d22abf1d6f391494be5a86fe38d8baa8fa2e"
 uuid = "ced4e74d-a319-5a8a-b0ac-84af2272839c"
-version = "0.6.25"
+version = "0.6.26"
 
 [[DocStringExtensions]]
 deps = ["LibGit2", "Markdown", "Pkg", "Test"]
@@ -386,9 +386,9 @@ version = "4.3.1+4"
 
 [[FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "1dc6ca6ad69eb9beadd3ce82b90910f4fa63d7c3"
+git-tree-sha1 = "746f68839306977040653ebbd249e39c15420b8a"
 uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.4.0"
+version = "1.4.1"
 
 [[FFTW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -539,9 +539,9 @@ version = "0.4.5"
 
 [[HypothesisTests]]
 deps = ["Combinatorics", "Distributions", "LinearAlgebra", "Random", "Rmath", "Roots", "Statistics", "StatsBase"]
-git-tree-sha1 = "a150d5e8eb339cf3c1fc61c123b9776d09b0a5d8"
+git-tree-sha1 = "a82a0c7e790fc16be185ce8d6d9edc7e62d5685a"
 uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
-version = "0.10.3"
+version = "0.10.4"
 
 [[IOCapture]]
 deps = ["Logging"]
@@ -1278,9 +1278,9 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[SolidStateDetectors]]
 deps = ["ArraysOfArrays", "Clustering", "DataStructures", "Distributions", "FillArrays", "Formatting", "Interpolations", "IntervalSets", "JSON", "LaTeXStrings", "LinearAlgebra", "ParallelProcessingTools", "ProgressMeter", "RadiationDetectorSignals", "Random", "RecipesBase", "Requires", "Rotations", "StaticArrays", "Statistics", "StatsBase", "Tables", "TypedTables", "Unitful", "YAML"]
-git-tree-sha1 = "761bbe154801620adffc7f17ec05ce1cf5811f02"
+git-tree-sha1 = "225b63fa117f86f1180110f3eef8758176138f16"
 uuid = "71e43887-2bd9-5f77-aebd-47f656f0a3f0"
-version = "0.5.1"
+version = "0.5.2"
 
 [[SortingAlgorithms]]
 deps = ["DataStructures"]
