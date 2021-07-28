@@ -73,6 +73,12 @@ git-tree-sha1 = "c31ebabde28d102b602bada60ce8922c266d205b"
 uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 version = "1.1.1"
 
+[[BinDeps]]
+deps = ["Libdl", "Pkg", "SHA", "URIParser", "Unicode"]
+git-tree-sha1 = "1289b57e8cf019aede076edab0587eb9644175bd"
+uuid = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
+version = "1.0.2"
+
 [[BitOperations]]
 git-tree-sha1 = "9737bdf9f6269eb7acfa445580736a9d1c297fbe"
 uuid = "e1e0eea2-bc69-5bf6-8574-13634873a17c"
@@ -233,6 +239,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "bda7a143df7c9160f9d7ea9e494f916718191583"
 uuid = "3bed1096-5ab2-53a1-92e2-6c1cc31d0f4b"
 version = "4.2.2+0"
+
+[[CurveFit]]
+deps = ["LinearAlgebra", "Polynomials"]
+git-tree-sha1 = "eb0e0c7f3c49611223c7ed2d75ad98cfe6a9b18c"
+uuid = "5a033b19-8c74-5913-a970-47c3779ef25c"
+version = "0.3.5"
 
 [[DSP]]
 deps = ["Compat", "FFTW", "IterTools", "LinearAlgebra", "Polynomials", "Random", "Reexport", "SpecialFunctions", "Statistics"]
@@ -716,7 +728,7 @@ version = "0.0.0"
 
 [[LegendGeSim]]
 deps = ["ArgCheck", "ArraysOfArrays", "Clustering", "CurveFit", "DSP", "DelimitedFiles", "Distributions", "ElasticArrays", "EncodedArrays", "FillArrays", "HDF5", "IntervalSets", "JSON", "LegendDataTypes", "LegendHDF5IO", "LegendTextIO", "LinearAlgebra", "LsqFit", "MJDSigGen", "Parameters", "Polynomials", "PropDicts", "RadiationDetectorDSP", "RadiationDetectorSignals", "RadiationSpectra", "Random", "Random123", "RecipesBase", "Requires", "SolidStateDetectors", "StaticArrays", "Statistics", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
-git-tree-sha1 = "df536b99d8181465dbe28141b75a4f55690f1cd8"
+git-tree-sha1 = "660f577b31cf6f715c990112c4d3fb573e2078a0"
 repo-rev = "master"
 repo-url = "https://github.com/legend-exp/LegendGeSim.jl.git"
 uuid = "e592b54b-af3c-468f-bcc7-10a913e293a7"
@@ -859,6 +871,14 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "5d494bc6e85c4c9b626ee0cab05daa4085486ab1"
 uuid = "5ced341a-0733-55b8-9ab6-a4889d929147"
 version = "1.9.3+0"
+
+[[MJDSigGen]]
+deps = ["BinDeps", "DelimitedFiles", "Libdl", "Test"]
+git-tree-sha1 = "7afac9e765d8220de09849de8ec09cee628a1cc7"
+repo-rev = "master"
+repo-url = "https://github.com/legend-exp/MJDSigGen.jl.git"
+uuid = "0b925020-e659-485c-98dd-189633cb4be4"
+version = "0.1.0"
 
 [[MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
@@ -1055,7 +1075,7 @@ uuid = "30392449-352a-5448-841d-b1acce4e97dc"
 version = "0.40.1+0"
 
 [[Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs"]
+deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[PlotThemes]]
@@ -1142,6 +1162,12 @@ deps = ["Distributed", "Printf"]
 git-tree-sha1 = "afadeba63d90ff223a6a48d2009434ecee2ec9e8"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.7.1"
+
+[[PropDicts]]
+deps = ["JSON"]
+git-tree-sha1 = "28ee438f56265367bf5a3092b181ea707e8ae9da"
+uuid = "4dc08600-4268-439e-8673-d706fafbb426"
+version = "0.2.0"
 
 [[ProtoBuf]]
 git-tree-sha1 = "51b74991da46594fb411a715e7e092bef50b99ff"
@@ -1442,6 +1468,12 @@ git-tree-sha1 = "19f9fca769be841fdf42241a4daa2ab52a11f89b"
 uuid = "9d95f2ec-7b3d-5a63-8d20-e2491e220bb9"
 version = "1.3.1"
 
+[[URIParser]]
+deps = ["Unicode"]
+git-tree-sha1 = "53a9f49546b8d2dd2e688d216421d050c9a31d0d"
+uuid = "30578b45-9adc-5946-b283-645ec420af67"
+version = "0.4.1"
+
 [[UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -1711,6 +1743,10 @@ version = "1.3.7+0"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+
+[[p7zip_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 
 [[pprof_jll]]
 deps = ["Libdl", "Pkg"]
