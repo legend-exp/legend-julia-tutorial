@@ -331,7 +331,7 @@ stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = "w
 Also, we need to filter out the few events that, due to numerical effects, lie outside of the detector (the proper solution is to shift them slightly, this feature will be added in the future):
 
 ```julia
-filtered_events = mc_events_fnoise[findall(pts -> all(p -> CartesianPoint(T.(ustrip.(uconvert.(u"m", p)))) in simulation.detector, pts), mc_events_fnoise.pos)];
+filtered_events = mc_events_fnoise[findall(pts -> all(p -> CartesianPoint(T.(ustrip.(uconvert.(u"m", p)))) in sim.detector, pts), mc_events_fnoise.pos)];
 length(filtered_events)
 ```
 
