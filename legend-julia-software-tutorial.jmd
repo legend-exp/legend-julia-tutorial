@@ -32,6 +32,13 @@ using LegendTextIO
     Martin&nbsp;Schuster&nbsp;&lang;<a href="mailto:schuster@mpp.mpg.de" target="_blank">schuster@mpp.mpg.de</a>&rang;,
     Anna&nbsp;Julia&nbsp;Zsigmond&nbsp;&lang;<a href="azsigmon@mpp.mpg.de" target="_blank">azsigmon@mpp.mpg.de</a>&rang;
 </p>
+
+<p style="text-align: center">
+    SolidStateDetectors.jl (SSD)<br>
+    <a href="https://juliaphysics.github.io/SolidStateDetectors.jl/stable/" target="_blank">Documentation</a><br> 
+    <a href="https://github.com/JuliaPhysics/SolidStateDetectors.jl" target="_blank">GitHub</a><br> 
+    <a href="https://arxiv.org/abs/2104.00109" target="_blank">Paper (ArXiv)</a>
+</p>
 <div style="margin-top:0.0em">
     <p style="text-align: center">
         <img alt="LEGEND Logo" src="images/logos/legend-logo.svg" style="height: 20em; display: inline-block; margin: 0em;"/>
@@ -49,8 +56,8 @@ First, load a detector definition - here, an inverted-coaxial example detector d
 ```julia
 detector_config_filename = SSD_examples[:InvertedCoax]
 T = Float32 # Optional; Default is Float32, but works with Float64 as well
-simulation = Simulation{T}(detector_config_filename)
-plot(simulation.detector, size = (700, 700))
+sim = Simulation{T}(detector_config_filename)
+plot(sim.detector, size = (700, 700))
 ```
 
 One can also have a look at how the initial conditions look like on the grid (it starts with a very coarse grid):
@@ -58,13 +65,13 @@ One can also have a look at how the initial conditions look like on the grid (it
 ```julia
 # This is optional. Its only to have a look at the initial state. 
 # For example, if you want to check if you specified the detector 
-# geometry correctly in you .json config file.
-apply_initial_state!(simulation, ElectricPotential) # optional 
+# geometry correctly in your configuration file.
+apply_initial_state!(sim, ElectricPotential, Grid(sim, max_tick_distance = 3u"mm")) # optional
 plot(
-    plot(simulation.electric_potential), # initial electric potential (boundary conditions)
-    plot(simulation.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
-    plot(simulation.ρ), # charge density distribution
-    plot(simulation.ϵ), # dielectric distribution
+    plot(sim.electric_potential), # initial electric potential (boundary conditions)
+    plot(sim.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
+    plot(sim.q_eff_imp), # effective charge density distribution
+    plot(sim.ϵ_r), # dielectric distribution
     layout = (1, 4), size = (1600, 500)
 )
 ```
@@ -72,16 +79,15 @@ plot(
 Next, calculate the electric potential:
 
 ```julia
-calculate_electric_potential!( simulation, 
-                               max_refinements = 4)
+calculate_electric_potential!(sim, convergence_limit = 1e-6, refinement_limits = [0.2, 0.1, 0.05, 0.01])
 ```
 
 ```julia
 plot(
-    plot(simulation.electric_potential, φ = 20), # initial electric potential (boundary conditions)
-    plot(simulation.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
-    plot(simulation.ρ), # charge density distribution
-    plot(simulation.ϵ), # dielectric distribution
+    plot(sim.electric_potential, φ = 20), # initial electric potential (boundary conditions)
+    plot(sim.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
+    plot(sim.q_eff_imp), # effective charge density distribution
+    plot(sim.ϵ_r), # dielectric distribution
     layout = (1, 4), size = (1600, 500)
 )
 ```
@@ -89,7 +95,7 @@ plot(
 SolidStateDetectors.jl supports active (i.e. depleted) volume calculation:
 
 ```julia
-get_active_volume(simulation.point_types) # approximation (sum of the volume of cells marked as depleted)
+get_active_volume(sim.point_types) # approximation (sum of the volume of cells marked as depleted)
 ```
 
 ### Partially depleted detectors
@@ -97,30 +103,25 @@ get_active_volume(simulation.point_types) # approximation (sum of the volume of 
 SolidStateDetectors.jl can also calculate the electric potential of a partially depleted detector:
 
 ```julia
-detector_undep = deepcopy(simulation.detector)
-detector_undep.contacts[end].potential = 500; # V  <-- Bias Voltage of Mantle
-```
+sim_undep = deepcopy(sim)
+sim_undep.detector = SolidStateDetector(sim_undep.detector, contact_id = 2, contact_potential = 500); # V  <-- Bias Voltage of Mantle
 
-```julia
-simulation_undep = Simulation(detector_undep);
-calculate_electric_potential!( simulation_undep, 
-                               depletion_handling = true, 
-                               convergence_limit=1e-6, 
-                               max_refinements = 4, 
-                               verbose = false);
-```
+calculate_electric_potential!( sim_undep,
+                               depletion_handling = true,
+                               convergence_limit = 1e-6,
+                               refinement_limits = [0.2, 0.1, 0.05, 0.03],
+                               verbose = false)
 
-```julia
 plot(
-    plot(simulation_undep.electric_potential), 
-    plot(simulation_undep.point_types), 
+    plot(sim_undep.electric_potential),
+    plot(sim_undep.point_types),
     layout = (1, 2), size = (800, 700)
 )
 ```
 
 ```julia
-println("Depleted:   ", get_active_volume(simulation.point_types))
-println("Undepleted: ", get_active_volume(simulation_undep.point_types));
+println("Depleted:   ", get_active_volume(sim.point_types))
+println("Undepleted: ", get_active_volume(sim_undep.point_types));
 ```
 
 ### Electric field calculation
@@ -128,13 +129,13 @@ println("Undepleted: ", get_active_volume(simulation_undep.point_types));
 Calculate the electric field of the fully depleted detector, given the already calculated electric potential:
 
 ```julia
-calculate_electric_field!(simulation, n_points_in_φ = 72)
-calculate_electric_field!(simulation_undep, n_points_in_φ = 72)
+calculate_electric_field!(sim, n_points_in_φ = 72)
+calculate_electric_field!(sim_undep, n_points_in_φ = 72)
 ```
 
 ```julia
-plot(simulation.electric_field, clims = (0,1e6), size = (400,700))
-plot_electric_fieldlines!(simulation)
+plot(sim.electric_field, full_det = true, φ = 0.0, size = (700, 700))
+plot_electric_fieldlines!(sim, full_det = true, φ = 0.0)
 ```
 
 ### Detector capacitance
@@ -142,13 +143,13 @@ plot_electric_fieldlines!(simulation)
 After the electric field is calculated, one can determine the detector capacitance:
 
 ```julia
-calculate_capacitance(simulation)
+calculate_capacitance(sim)
 ```
 
 Note: This value seems to be a bit high for an inverted coax detector. However, this is because the impurity density defined for this example detector is higher than for a real detector. If the bias voltage is increased (or the impurity density is set to 0), the capacity converges to its lower limit which is basically only defined through the geometry and material.
 
 ```julia
-calculate_capacitance(simulation_undep)
+calculate_capacitance(sim_undep)
 ```
 
 ### Drift field calculation
@@ -156,9 +157,9 @@ calculate_capacitance(simulation_undep)
 Given the electric field and a charge drift model, calculate the drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation.
 
 ```julia
-charge_drift_model = ADLChargeDriftModel(T=T)
-set_charge_drift_model!(simulation, charge_drift_model)
-calculate_drift_fields!(simulation)
+charge_drift_model = ADLChargeDriftModel()
+sim.detector = SolidStateDetector(sim.detector, charge_drift_model)
+calculate_drift_fields!(sim)
 ```
 
 ### Weighting potential calculation
@@ -166,15 +167,15 @@ calculate_drift_fields!(simulation)
 We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
 
 ```julia
-for contact in simulation.detector.contacts
-    calculate_weighting_potential!(simulation, contact.id, max_refinements = 4, n_points_in_φ = 2, verbose = false)
+for contact in sim.detector.contacts
+    calculate_weighting_potential!(sim, contact.id, refinement_limits = [0.2, 0.1, 0.05, 0.01], n_points_in_φ = 2, verbose = false)
 end
 ```
 
 ```julia
 plot(  
-    plot(simulation.weighting_potentials[1]),
-    plot(simulation.weighting_potentials[2]),
+    plot(sim.weighting_potentials[1]),
+    plot(sim.weighting_potentials[2]),
     size = (900, 700)
 )
 ```
@@ -184,26 +185,25 @@ plot(
 Now, let's create an "random" (multisite) event:
 
 ```julia
-starting_positions = [ CylindricalPoint{T}( 0.020, deg2rad(10), 0.015 ), 
-                       CylindricalPoint{T}( 0.015, deg2rad(20), 0.045 ), 
-                       CylindricalPoint{T}( 0.025, deg2rad(30), 0.025 ) ]
+starting_positions = [ CylindricalPoint{T}( 0.020, deg2rad(10), 0.015 ),
+                       CylindricalPoint{T}( 0.015, deg2rad(20), 0.045 ),
+                       CylindricalPoint{T}( 0.022, deg2rad(35), 0.025 ) ]
 energy_depos = T[1460, 609, 1000] * u"keV" # are needed later in the signal generation
 
-event = Event(starting_positions, energy_depos);
+evt = Event(starting_positions, energy_depos);
 ```
 
 ```julia
-time_step = 1u"ns"
-simulate!(event, simulation, Δt = time_step, max_nsteps = 1000)
+simulate!(evt, sim, Δt = 5u"ns")
 ```
 
 ```julia
-plot(simulation.detector, size = (700, 700))
-plot!(event.drift_paths)
+plot(sim.detector, size = (700, 700))
+plot!(evt.drift_paths)
 ```
 
 ```julia
-p_pc_signal = plot( event.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "Time / ns",
+p_pc_signal = plot( evt.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "Time / ns",
                     legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
 ```
 
@@ -212,17 +212,17 @@ p_pc_signal = plot( event.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "T
 The package offers a conversion of all the calculated fields to `NamedTuple`s which allows for saving and loading them into HDF5 files via the [LegendHDF5IO.jl](https://github.com/legend-exp/LegendHDF5IO.jl) package:
 
 ```julia
-simulation
+sim
 ```
 
 ```julia
 filename = "cache/inverted_coax_simulation.h5f"
 if !ispath(dirname(filename)) mkpath(dirname(filename)) end
-SolidStateDetectors.ssd_write(filename, simulation)
+SolidStateDetectors.ssd_write(filename, sim)
 ```
 
 ```julia
-simulation = SolidStateDetectors.ssd_read(filename, Simulation)
+sim = SolidStateDetectors.ssd_read(filename, Simulation);
 ```
 
 # Quick simulation
@@ -231,7 +231,7 @@ All the above steps, which offer more fine control over the individual steps, ca
 
 ```julia
 quick_sim = Simulation{T}(detector_config_filename)
-simulate!(quick_sim); # Keywords (defaults): max_refinements = 1, verbose = false
+simulate!(quick_sim);
 plot( 
     plot(quick_sim.electric_potential),
     plot(quick_sim.weighting_potentials[1]),
@@ -322,7 +322,7 @@ Let's make things more realistic by adding Fano noise:
 
 ```julia
 Random.seed!(123) # only for testing 
-det_material = simulation.detector.semiconductors[1].material
+det_material = sim.detector.semiconductor.material
 mc_events_fnoise = add_fano_noise(mc_events_det1, det_material.E_ionisation, det_material.f_fano)
 stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, label = "raw MC edep", yscale = :log10)
 stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = "with Fano noise", yscale = :log10)
@@ -331,14 +331,14 @@ stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = "w
 Also, we need to filter out the few events that, due to numerical effects, lie outside of the detector (the proper solution is to shift them slightly, this feature will be added in the future):
 
 ```julia
-filtered_events = mc_events_fnoise[findall(pts -> all(p -> T.(ustrip.(uconvert.(u"m", p))) in simulation.detector, pts), mc_events_fnoise.pos)];
+filtered_events = mc_events_fnoise[findall(pts -> all(p -> CartesianPoint(T.(ustrip.(uconvert.(u"m", p)))) in sim.detector, pts), mc_events_fnoise.pos)];
 length(filtered_events)
 ```
 
 ```julia
-contact_charge_signals = SolidStateDetectors.simulate_waveforms(      
+contact_charge_signals = simulate_waveforms(      
         filtered_events[1:2000],
-        simulation,
+        sim,
         max_nsteps = 4000, 
         Δt = 1u"ns", 
         verbose = false);
@@ -355,8 +355,8 @@ One can also look individual events
 
 ```julia
 evt1 = Event(filtered_events[1], T)
-simulate!(evt1, simulation, max_nsteps = 4000, Δt = 1u"ns", verbose = true)
-p_drift = plot(simulation.detector)
+simulate!(evt1, sim, max_nsteps = 4000, Δt = 1u"ns", verbose = true)
+p_drift = plot(sim.detector)
 plot!(evt1.drift_paths)
 p_signal = plot(evt1.waveforms[1], lw = 2, legend = false)
 plot(p_drift, p_signal, size = (1200, 600))
@@ -378,7 +378,10 @@ noisy_waveforms = ArrayOfRDWaveforms(
         wf -> RDWaveform(wf.time, wf.value .+ rand!(Normal(0, 5e3), similar(wf.value))),
         waveforms_with_baseline_and_tail
     )
-)
+);
+```
+
+```julia
 plot(noisy_waveforms[1:100], legend = false, size = (900, 400))
 ```
 
@@ -397,10 +400,6 @@ post_pulse_mean = mean.(map(signal -> signal[end-filter_length:end], noisy_wavef
 E_reco = post_pulse_mean .- pre_pulse_mean
 hist_uncal = fit(Histogram, filter(e -> e > energy_threshold, E_reco), nbins = 2000)
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
-```
-
-```julia
-println(hist_uncal)
 ```
 
 ## Spectrum analysis
