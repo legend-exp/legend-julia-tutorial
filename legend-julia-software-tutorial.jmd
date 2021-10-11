@@ -28,6 +28,7 @@ using LegendTextIO
 <p style="text-align: center">
     Felix&nbsp;Hagemann&nbsp;&lang;<a href="mailto:hagemann@mpp.mpg.de" target="_blank">hagemann@mpp.mpg.de</a>&rang;,
     Lukas&nbsp;Hauertmann&nbsp;&lang;<a href="mailto:lhauert@mpp.mpg.de" target="_blank">lhauert@mpp.mpg.de</a>&rang;,
+    David&nbsp;Hervas&nbsp;Aguilar&nbsp;&lang;<a href="mailto:hervasa2@mpp.mpg.de" target="_blank">hervasa2@mpp.mpg.de</a>&rang;,
     Oliver&nbsp;Schulz&nbsp;&lang;<a href="mailto:oschulz@mpp.mpg.de" target="_blank">oschulz@mpp.mpg.de</a>&rang;,
     Martin&nbsp;Schuster&nbsp;&lang;<a href="mailto:schuster@mpp.mpg.de" target="_blank">schuster@mpp.mpg.de</a>&rang;,
     Anna&nbsp;Julia&nbsp;Zsigmond&nbsp;&lang;<a href="azsigmon@mpp.mpg.de" target="_blank">azsigmon@mpp.mpg.de</a>&rang;
@@ -66,7 +67,7 @@ One can also have a look at how the initial conditions look like on the grid (it
 # This is optional. Its only to have a look at the initial state. 
 # For example, if you want to check if you specified the detector 
 # geometry correctly in your configuration file.
-apply_initial_state!(sim, ElectricPotential, Grid(sim, max_tick_distance = 3u"mm")) # optional
+apply_initial_state!(sim, ElectricPotential)
 plot(
     plot(sim.electric_potential), # initial electric potential (boundary conditions)
     plot(sim.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
@@ -138,29 +139,6 @@ plot(sim.electric_field, full_det = true, φ = 0.0, size = (700, 700))
 plot_electric_fieldlines!(sim, full_det = true, φ = 0.0)
 ```
 
-### Detector capacitance
-
-After the electric field is calculated, one can determine the detector capacitance:
-
-```julia
-calculate_capacitance(sim)
-```
-
-Note: This value seems to be a bit high for an inverted coax detector. However, this is because the impurity density defined for this example detector is higher than for a real detector. If the bias voltage is increased (or the impurity density is set to 0), the capacity converges to its lower limit which is basically only defined through the geometry and material.
-
-```julia
-calculate_capacitance(sim_undep)
-```
-
-### Drift field calculation
-
-Given the electric field and a charge drift model, calculate the drift fields for electrons and holes. Precalculating the drift fields saves time during charge drift simulation.
-
-```julia
-charge_drift_model = ADLChargeDriftModel()
-sim.detector = SolidStateDetector(sim.detector, charge_drift_model)
-calculate_drift_fields!(sim)
-```
 
 ### Weighting potential calculation
 
@@ -180,7 +158,24 @@ plot(
 )
 ```
 
+### Detector capacitance
+
+After the weighting potentials are calculated, one can determine the detector capacitance matrix:
+
+```julia
+calculate_capacitance_matrix(sim)
+```
+
+
+
 # Drift and waveform simulation
+
+Given the electric field and a charge drift model, the charge drift can be simulated:
+
+```julia
+charge_drift_model = ADLChargeDriftModel()
+sim.detector = SolidStateDetector(sim.detector, charge_drift_model);
+```
 
 Now, let's create an "random" (multisite) event:
 
@@ -203,8 +198,8 @@ plot!(evt.drift_paths)
 ```
 
 ```julia
-p_pc_signal = plot( evt.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "Time / ns",
-                    legend = false, tickfontsize = 12, ylabel = "Energy / eV", guidefontsize = 14)
+p_pc_signal = plot( evt.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = "Time", ylabel = "Charge", 
+                    unitformat = :slash, legend = false, tickfontsize = 12, guidefontsize = 14)
 ```
 
 # I/O
@@ -218,11 +213,11 @@ sim
 ```julia
 filename = "cache/inverted_coax_simulation.h5f"
 if !ispath(dirname(filename)) mkpath(dirname(filename)) end
-SolidStateDetectors.ssd_write(filename, sim)
+ssd_write(filename, sim)
 ```
 
 ```julia
-sim = SolidStateDetectors.ssd_read(filename, Simulation);
+sim = ssd_read(filename, Simulation);
 ```
 
 # Quick simulation
@@ -356,10 +351,10 @@ One can also look individual events
 ```julia
 evt1 = Event(filtered_events[1], T)
 simulate!(evt1, sim, max_nsteps = 4000, Δt = 1u"ns", verbose = true)
-p_drift = plot(sim.detector)
+p_drift = plot(sim.detector, label = "")
 plot!(evt1.drift_paths)
 p_signal = plot(evt1.waveforms[1], lw = 2, legend = false)
-plot(p_drift, p_signal, size = (1200, 600))
+plot(p_drift, p_signal, size = (800, 400))
 ```
 
 We should add pre- and post-pulse baselines ...
@@ -372,10 +367,9 @@ plot(waveforms_with_baseline_and_tail[1:10], legend = false)
 ... and also add some random values along the waveforms to simulate electronics noise in a simple fashion:
 
 ```julia
-noise = map( wf -> rand!(Normal(0, 5e3), similar(wf)), waveforms_with_baseline_and_tail.value)
 noisy_waveforms = ArrayOfRDWaveforms(
     map(
-        wf -> RDWaveform(wf.time, wf.value .+ rand!(Normal(0, 5e3), similar(wf.value))),
+        wf -> RDWaveform(wf.time, wf.value .+ rand!(Normal(0, 5e3), similar(ustrip.(wf.value)))*unit(eltype(wf.value))),
         waveforms_with_baseline_and_tail
     )
 );
@@ -398,7 +392,7 @@ pre_pulse_std = std.(map(signal -> signal[1:filter_length], noisy_waveforms.valu
 energy_threshold = mean(pre_pulse_std) * 3
 post_pulse_mean = mean.(map(signal -> signal[end-filter_length:end], noisy_waveforms.value))
 E_reco = post_pulse_mean .- pre_pulse_mean
-hist_uncal = fit(Histogram, filter(e -> e > energy_threshold, E_reco), nbins = 2000)
+hist_uncal = fit(Histogram, ustrip.(filter(e -> e > energy_threshold, E_reco)), nbins = 1000)
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
 ```
 
