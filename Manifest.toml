@@ -1351,10 +1351,12 @@ version = "1.5.0"
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[deps.SolidStateDetectors]]
-deps = ["ArraysOfArrays", "Clustering", "DataStructures", "Distributions", "FillArrays", "Formatting", "Interpolations", "IntervalSets", "JSON", "LaTeXStrings", "LinearAlgebra", "ParallelProcessingTools", "Parameters", "PolygonOps", "Polynomials", "ProgressMeter", "RadiationDetectorSignals", "Random", "RecipesBase", "Requires", "Rotations", "StaticArrays", "Statistics", "StatsBase", "Tables", "TypedTables", "Unitful", "YAML"]
-git-tree-sha1 = "ffdffe770de9adabe8f0e633ddcec42f398c8a41"
+deps = ["Adapt", "ArraysOfArrays", "Clustering", "DataStructures", "Distributions", "FillArrays", "Formatting", "GPUArrays", "Interpolations", "IntervalSets", "JSON", "KernelAbstractions", "LaTeXStrings", "LinearAlgebra", "ParallelProcessingTools", "Parameters", "PolygonOps", "Polynomials", "ProgressMeter", "RadiationDetectorSignals", "Random", "RecipesBase", "Requires", "Rotations", "StaticArrays", "Statistics", "StatsBase", "Tables", "TypedTables", "Unitful", "UnitfulAtomic", "UnitfulRecipes", "YAML"]
+git-tree-sha1 = "46321c36010cf2ee606842d933736d26d327e4cf"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaPhysics/SolidStateDetectors.jl.git"
 uuid = "71e43887-2bd9-5f77-aebd-47f656f0a3f0"
-version = "0.6.3"
+version = "0.7.0"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
@@ -1502,6 +1504,12 @@ deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
 git-tree-sha1 = "a981a8ef8714cba2fd9780b22fd7a469e7aaf56d"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
 version = "1.9.0"
+
+[[deps.UnitfulAtomic]]
+deps = ["Unitful"]
+git-tree-sha1 = "903be579194534af1c4b4778d1ace676ca042238"
+uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+version = "1.0.0"
 
 [[deps.UnitfulRecipes]]
 deps = ["RecipesBase", "Unitful"]
