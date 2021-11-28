@@ -1,11 +1,16 @@
 @info "Starting precompile exec."
 
-using BAT, ValueShapes, Distributions, LinearAlgebra
+using Distributions, LinearAlgebra, DensityInterface, InverseFunctions
+using BAT, ValueShapes
 import Cuba
 
-primary_dist = NamedTupleDist(a = Normal(), b = Weibull(), c = 5)
-f_secondary = x -> NamedTupleDist(y = Normal(x.a, x.b), z = MvNormal([1.3 0.5; 0.5 2.2]))
-density = PosteriorDensity(MvNormal(Diagonal(fill(1.0, 5))), HierarchicalDistribution(f_secondary, primary_dist))
+prior = HierarchicalDistribution(
+    NamedTupleDist(a = Normal(), b = Weibull(), c = 5)
+) do x
+    NamedTupleDist(y = Normal(x.a, x.b), z = MvNormal([1.3 0.5; 0.5 2.2]))
+end
+likelihood = logfuncdensity((x -> -norm(x)^2) ∘ inverse(varshape(prior)))
+density = PosteriorDensity(likelihood, prior)
 
 samples_mh = bat_sample(density, MCMCSampling(mcalg = MetropolisHastings(), nchains = 4, nsteps = 10^4, strict = false)).result
 
