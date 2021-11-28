@@ -139,7 +139,6 @@ plot(sim.electric_field, full_det = true, φ = 0.0, size = (700, 700))
 plot_electric_fieldlines!(sim, full_det = true, φ = 0.0)
 ```
 
-
 ### Weighting potential calculation
 
 We need weighting potentials to simulate the detector charge signal induced by drifting charges. We'll calculate the weighting potential for the point contact and the outer shell of the detector:
@@ -165,8 +164,6 @@ After the weighting potentials are calculated, one can determine the detector ca
 ```julia
 calculate_capacitance_matrix(sim)
 ```
-
-
 
 # Drift and waveform simulation
 
@@ -401,7 +398,7 @@ plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
 The package [RadiationSpectra.jl](https://github.com/JuliaPhysics/RadiationSpectra.jl) provides a mechanism finding peaks in the spectrum. It can also run an auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:
 
 ```julia
-gamma_lines = [510.77, 583.191, 2614.533] 
+gamma_lines = [510.77, 583.191, 727.330, 860.564, 2614.533] 
 
 h_cal, h_deconv, peakPositions, threshold, c, c_precal = RadiationSpectra.calibrate_spectrum(
     hist_uncal, gamma_lines)
@@ -412,4 +409,7 @@ hline!([threshold], label ="threshold")
 p_cal = plot(h_cal, st = :step, yscale = :log10, label="calibrated spectrum", xlabel="E / keV", xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
 vline!(gamma_lines, label="gamma lines: $(gamma_lines)")
 plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))
+```
+
+```julia
 ```
