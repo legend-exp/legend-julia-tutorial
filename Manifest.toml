@@ -70,7 +70,7 @@ version = "1.0.1"
 [[deps.BAT]]
 deps = ["AdaptiveRejectionSampling", "AdvancedHMC", "ArgCheck", "ArraysOfArrays", "CPUTime", "ChainRulesCore", "ChangesOfVariables", "Clustering", "Colors", "DataStructures", "Dates", "DensityInterface", "DiffResults", "Distributed", "Distributions", "DistributionsAD", "DocStringExtensions", "DoubleFloats", "ElasticArrays", "EmpiricalDistributions", "FFTW", "FillArrays", "FiniteDiff", "ForwardDiff", "ForwardDiffPullbacks", "HypothesisTests", "IntervalSets", "InverseFunctions", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "Markdown", "Measurements", "NLSolversBase", "NamedArrays", "Optim", "PDMats", "ParallelProcessingTools", "Parameters", "PositiveFactorizations", "PrettyTables", "Printf", "ProgressMeter", "QuadGK", "Random", "Random123", "RecipesBase", "Requires", "Sobol", "SpecialFunctions", "StaticArrays", "Statistics", "StatsBase", "StructArrays", "Tables", "TypedTables", "ValueShapes", "Zygote", "ZygoteRules"]
 git-tree-sha1 = "c9f0248cb1fcdebee73245fc232c404237cdaa0c"
-repo-rev = "master"
+repo-rev = "main"
 repo-url = "https://github.com/bat/BAT.jl.git"
 uuid = "c0cd4b16-88b7-57fa-983b-ab80aecada7e"
 version = "3.0.0-DEV"
@@ -776,7 +776,7 @@ version = "0.1.3"
 [[deps.LegendDataTypes]]
 deps = ["ArgCheck", "ArraysOfArrays", "Colors", "ElasticArrays", "EncodedArrays", "RadiationDetectorSignals", "RadiationSpectra", "RecipesBase", "StaticArrays", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
 git-tree-sha1 = "4c78f64c72769c8f9b938c5d48e71c1cc4cf0c77"
-repo-rev = "master"
+repo-rev = "main"
 repo-url = "https://github.com/legend-exp/LegendDataTypes.jl.git"
 uuid = "99e09c13-5545-5ee2-bfa2-77f358fb75d8"
 version = "0.1.0"
@@ -784,7 +784,7 @@ version = "0.1.0"
 [[deps.LegendHDF5IO]]
 deps = ["ArraysOfArrays", "ElasticArrays", "EncodedArrays", "HDF5", "LegendDataTypes", "RadiationDetectorSignals", "StaticArrays", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
 git-tree-sha1 = "b9494bf8f729e078db4b0af549140917d49a8531"
-repo-rev = "master"
+repo-rev = "main"
 repo-url = "https://github.com/legend-exp/LegendHDF5IO.jl.git"
 uuid = "c9265ca6-b027-5446-b1a4-febfa8dd10b0"
 version = "0.1.0"
@@ -792,7 +792,7 @@ version = "0.1.0"
 [[deps.LegendTextIO]]
 deps = ["ArraysOfArrays", "BufferedStreams", "CSV", "DelimitedFiles", "LegendDataTypes", "Mmap", "Parsers", "RadiationDetectorSignals", "StaticArrays", "Tables", "Unitful"]
 git-tree-sha1 = "8eb1f9b2fa808ab2ef8af860295533576c60d84a"
-repo-rev = "master"
+repo-rev = "main"
 repo-url = "https://github.com/legend-exp/LegendTextIO.jl.git"
 uuid = "c397c909-374d-579b-8af3-fa3aa4f02e89"
 version = "0.1.1"
