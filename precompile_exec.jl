@@ -18,7 +18,6 @@ samples_hmc = bat_sample(density, MCMCSampling(mcalg = HamiltonianMC(), nchains 
 @show sd = SampledDensity(density, samples_hmc)
 @show ess = bat_eff_sample_size(samples_hmc)
 
-integral_ahmi = bat_integrate(samples_hmc, AHMIntegration()).result
 integral_vegas = bat_integrate(density, VEGASIntegration(strict = false)).result
 
 
