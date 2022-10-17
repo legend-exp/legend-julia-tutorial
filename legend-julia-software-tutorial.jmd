@@ -366,7 +366,7 @@ plot(waveforms_with_baseline_and_tail[1:10], legend = false)
 ```julia
 noisy_waveforms = ArrayOfRDWaveforms(
     map(
-        wf -> RDWaveform(wf.time, wf.value .+ rand!(Normal(0, 5e3), similar(ustrip.(wf.value)))*unit(eltype(wf.value))),
+        wf -> RDWaveform(wf.time, wf.signal .+ rand!(Normal(0, 5e3), similar(ustrip.(wf.signal)))*unit(eltype(wf.signal))),
         waveforms_with_baseline_and_tail
     )
 );
@@ -384,10 +384,10 @@ We can reconstruct a spectrum from the simulated waveforms, using the difference
 
 ```julia
 filter_length = 50
-pre_pulse_mean = mean.(map(signal -> signal[1:filter_length], noisy_waveforms.value))
-pre_pulse_std = std.(map(signal -> signal[1:filter_length], noisy_waveforms.value))
+pre_pulse_mean = mean.(map(signal -> signal[1:filter_length], noisy_waveforms.signal))
+pre_pulse_std = std.(map(signal -> signal[1:filter_length], noisy_waveforms.signal))
 energy_threshold = mean(pre_pulse_std) * 3
-post_pulse_mean = mean.(map(signal -> signal[end-filter_length:end], noisy_waveforms.value))
+post_pulse_mean = mean.(map(signal -> signal[end-filter_length:end], noisy_waveforms.signal))
 E_reco = post_pulse_mean .- pre_pulse_mean
 hist_uncal = fit(Histogram, ustrip.(filter(e -> e > energy_threshold, E_reco)), nbins = 1000)
 plot(hist_uncal, st = :step, yscale = :log10, label="uncalibrated spectrum")
