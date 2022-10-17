@@ -4,6 +4,8 @@ This tutorial demonstrates the LEGEND Julia software stack: It shows how to simu
 
 Note: This is a work in progress, more functionality will be added over time. The LEGEND-related software packages used are still under very active development, so types and functions may change without notice. This tutorial will be updated regularly and adapted to API changes.
 
+[![Documentation](https://img.shields.io/badge/docs-main-blue.svg)](https://legend-exp.github.io/legend-julia-tutorial/main)
+
 
 ## Required Software
 
