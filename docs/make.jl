@@ -5,43 +5,17 @@
 # for local builds.
 
 using Pkg
-using Weave
 using Documenter
 using Literate
 using SolidStateDetectors
 
-function fix_weave_output(file)
-    lines = readlines(file)
-    keep = true
-    open(file, "w") do ids_file
-        for line in lines
-            if startswith(line, "#' <h1 style")
-                keep = false
-            elseif startswith(line, "#' <p>See")
-                keep = true
-            elseif keep
-                if startswith(line, "#'")
-                    println(ids_file, replace(line, "#'" => "#", count=1))
-                elseif startswith(line, "#+")
-                    println(ids_file, replace(line, "#+" => "#", count=1))
-                else
-                    println(ids_file, line)
-                end
-            end
-        end
-    end
-end
-
 function fix_literate_output(content)
-    content = replace(content, "<unknown>/src/" => "")
+    content = replace(content, "EditURL = \"@__REPO_ROOT_URL__/\"" => "")
     return content
 end
 
 gen_content_dir = joinpath(@__DIR__, "src")
-tut_src_fn = joinpath(@__DIR__, "..", "legend-julia-software-tutorial.jmd")
-tut_out_fn = joinpath(gen_content_dir, "legend-julia-software-tutorial.jl")
-convert_doc(tut_src_fn, tut_out_fn)
-fix_weave_output(tut_out_fn)
+tut_out_fn = joinpath(@__DIR__, "..", "legend-julia-software-tutorial.jl")
 
 tut_basename = "legend-julia-software-tutorial"
 Literate.markdown(tut_out_fn, gen_content_dir, name = tut_basename, documenter = true, credit = true, postprocess = fix_literate_output)

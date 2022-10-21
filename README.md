@@ -87,11 +87,15 @@ Optional: To make this environment available generally, independent of your curr
 
 Optional: Of course you may also istall the required packages (listed in "Project.toml") into your default julia environment (located in "$HOME/user/.julia/environments/v1.4"), the packages in the default environment are always available in Julia.
 
-The tutorial is based on the included Markdown file with embedded Julia code "legend-julia-software-tutorial.md", from which a Jupyter notebook "legend-julia-software-tutorial.ipynb" and a plain Julia script "legend-julia-software-tutorial.jl" can be generated. To generate all tutorial files, run
+The file "legend-julia-software-tutorial.jl" is Julia script with embedded Markdown text sections. The script "make.jl" uses the Julia package [Literate.jl](https://github.com/fredrikekre/Literate.jl) to convert this script into a Jupyter notebook "legend-julia-software-tutorial.ipynb" with code and text cells.
+
+Do do so, run
 
 ```shell
 julia --project=. make.jl
 ```
+
+You may of course also run the script "legend-julia-software-tutorial.jl" directly. However, plots will constantly be replaced by the next plot and no output will be saved. The Julia script is more useful as a starting point for advanced users who want to start developing their own scripts.
 
 
 ## Running the tutorial
@@ -136,39 +140,6 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port 8888 --allow-root
 ```
 
 On the Jupyter web page, open the notebook "legend-julia-software-tutorial.ipynb", and on the notebook page, choose "Run all cells" from the menu at the top of the page.
-
-
-### Using the Markdown tutorial document with embedded Julia code
-
-Note: We haven't tested this variant as well as using Jupyter, use at your own risk. In some circumstances, Weave seems to produce all plots but doesn't terminate and fails to produce a final output document.
-
-The file "legend-julia-software-tutorial.jmd" is a human-readable Markdown document with embedded Julia code sections. You can use the Julia package [Weave.jl](https://github.com/mpastell/Weave.jl) to run the embedded code and generate a report (with embedded plots) from it in various formats (PDF, HTML, LaTeX, etc.). The result is similar to a Jupyter notebook converted to such an output format.
-
-Start Julia (with the tutorial environment)
-
-```shell
-julia --project=.
-```
-
-and (on the Julia console) run
-
-```julia
-julia> using Weave
-julia> weave("legend-julia-software-tutorial.jmd", doctype="md2html")
-```
-
-You can list the available output formats (e.g. "md2html", "md2pdf", etc.) via
-
-```julia
-julia> Weave.list_out_formats()
-```
-
-Some output formats will require additional software (e.g. certain LaTeX packages) to be installed.
-
-
-### Using the Julia tutorial script
-
-You can also run the script "legend-julia-software-tutorial.jl" directly. However, plots will constantly be replaced by the next plot and no output will be saved. The Julia script is more useful as a starting point for advanced users who want to start developing their own scripts.
 
 
 ### Building a custom Julia LEGEND system image

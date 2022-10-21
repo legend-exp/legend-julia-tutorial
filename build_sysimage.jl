@@ -2,7 +2,7 @@
 # Copyright (C) 2020 Oliver Schulz <oschulz@mpp.mpg.de>
 
 orig_dir = @__DIR__
-@assert isfile(joinpath(orig_dir, "legend-julia-software-tutorial.jmd"))
+@assert isfile(joinpath(orig_dir, "legend-julia-software-tutorial.jl"))
 
 prj_dir = length(ARGS) >= 1 ? ARGS[1] : orig_dir
 @assert isdir(prj_dir)
@@ -18,8 +18,6 @@ import Pkg
 Pkg.activate(prj_dir)
 Pkg.instantiate()
 Pkg.precompile()
-
-include("make.jl")
 
 import PackageCompiler, Libdl
 

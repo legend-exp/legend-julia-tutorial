@@ -1,6 +1,5 @@
 # This script is licensed under the MIT License (MIT).
 
-using Weave
+import Literate
 
-convert_doc("legend-julia-software-tutorial.jmd", "legend-julia-software-tutorial.jl")
-convert_doc("legend-julia-software-tutorial.jmd", "legend-julia-software-tutorial.ipynb")
+Literate.notebook("legend-julia-software-tutorial.jl", ".", execute = false, name = "legend-julia-software-tutorial", credit = true)
