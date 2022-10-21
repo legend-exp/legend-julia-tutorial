@@ -22,9 +22,9 @@ uuid = "80f14c24-f653-4e6a-9b94-39d6b0f70001"
 version = "4.1.3"
 
 [[deps.AbstractTrees]]
-git-tree-sha1 = "5c0b629df8a5566a06f5fef5100b53ea56e465a0"
+git-tree-sha1 = "52b3b436f8f73133d7bc3a6c71ee7ed6ab2ab754"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.4.2"
+version = "0.4.3"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -55,9 +55,9 @@ version = "1.1.1"
 
 [[deps.ArrayInterfaceCore]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "e9f7992287edfc27b3cbe0046c544bace004ca5b"
+git-tree-sha1 = "e6cba4aadba7e8a7574ab2ba2fcfb307b4c4b02a"
 uuid = "30b0a656-2188-435a-8636-2ec0e6a096e2"
-version = "0.1.22"
+version = "0.1.23"
 
 [[deps.ArraysOfArrays]]
 deps = ["Adapt", "ChainRulesCore", "StaticArraysCore", "Statistics"]
@@ -130,10 +130,10 @@ uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
 
 [[deps.CSV]]
-deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "873fb188a4b9d76549b81465b1f75c82aaf59238"
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "SnoopPrecompile", "Tables", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "d1b3d33f3d15e382cf92bff7cf4b2814330392a0"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.4"
+version = "0.10.5"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -818,7 +818,7 @@ version = "0.1.1"
 
 [[deps.LegendHDF5IO]]
 deps = ["ArraysOfArrays", "ElasticArrays", "EncodedArrays", "HDF5", "LegendDataTypes", "RadiationDetectorSignals", "StaticArrays", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful"]
-git-tree-sha1 = "125a8d5b388f104f1eac13a2c7e4345c1240965f"
+git-tree-sha1 = "418fbc3bbedd255241eff218311a4f97c83e2636"
 repo-rev = "main"
 repo-url = "https://github.com/legend-exp/LegendHDF5IO.jl.git"
 uuid = "c9265ca6-b027-5446-b1a4-febfa8dd10b0"
@@ -840,7 +840,7 @@ version = "0.6.3"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.81.0+0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1186,9 +1186,9 @@ version = "1.3.1"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "524d9ff1b2f4473fef59678c06f9f77160a204b1"
+git-tree-sha1 = "0a56829d264eb1bc910cf7c39ac008b5bcb5a0d9"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.35.3"
+version = "1.35.5"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1279,10 +1279,10 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.RadiationDetectorDSP]]
-deps = ["ArgCheck", "ArraysOfArrays", "DSP", "Distributions", "ElasticArrays", "LinearAlgebra", "ParallelProcessingTools", "Parameters", "RadiationDetectorSignals", "Random", "RecipesBase", "SIMD", "StaticArrays", "Statistics", "StatsBase", "TypedTables"]
-git-tree-sha1 = "474481e59e246b709e94349a4a2e0236c2a6373e"
+deps = ["Adapt", "ArgCheck", "ArraysOfArrays", "ChainRulesCore", "CompositionsBase", "DSP", "DocStringExtensions", "ElasticArrays", "FFTW", "FillArrays", "FunctionChains", "InverseFunctions", "KernelAbstractions", "LinearAlgebra", "Parameters", "RadiationDetectorSignals", "Random", "SIMD", "Statistics", "StatsBase", "TypedTables", "UnPack", "Unitful"]
+git-tree-sha1 = "d991996b7d5fa8967e6f65e702463c269b558f8b"
 uuid = "afd6e06f-c550-5763-af36-7391d39e46ec"
-version = "0.1.3"
+version = "0.1.4"
 
 [[deps.RadiationDetectorSignals]]
 deps = ["ArraysOfArrays", "ElasticArrays", "EncodedArrays", "FillArrays", "IntervalSets", "RecipesBase", "StaticArrays", "StatsBase", "StructArrays", "Tables", "TypedTables", "Unitful", "UnsafeArrays"]
@@ -1556,7 +1556,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1829,9 +1829,9 @@ version = "1.4.0+3"
 
 [[deps.YAML]]
 deps = ["Base64", "Dates", "Printf", "StringEncodings"]
-git-tree-sha1 = "3c6e8b9f5cdaaa21340f841653942e1a6b6561e5"
+git-tree-sha1 = "dbc7f1c0012a69486af79c8bcdb31be820670ba2"
 uuid = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
-version = "0.4.7"
+version = "0.4.8"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
@@ -1877,7 +1877,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.1.0+0"
+version = "5.1.1+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1900,7 +1900,7 @@ version = "1.3.7+1"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.41.0+1"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
