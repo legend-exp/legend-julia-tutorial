@@ -142,36 +142,6 @@ jupyter notebook --no-browser --ip 0.0.0.0 --port 8888 --allow-root
 On the Jupyter web page, open the notebook "legend-julia-software-tutorial.ipynb", and on the notebook page, choose "Run all cells" from the menu at the top of the page.
 
 
-### Building a custom Julia LEGEND system image
-
-The LEGEND Julia packages and their dependencies constitute a large code base, using them the first time in a new Julia session takes a while (each time). To reduce this startup latency (due to package loading and code-generation
-time), you can build a custom Julia system image that includes almost all of the packages used in the LEGEND Julia tutorial via [PackageCompiler.jl](https://julialang.github.io/PackageCompiler.jl/dev/).
-
-If you do *not* have added PackageCompiler to your default environment (we recommend that you do), you can add PackageCompiler to the "legend-julia-tutorial" project using
-
-```shell
-julia --project=. -e 'using Pkg; Pkg.add("PackageCompiler")'
-```
-
-To build the custom Julia LEGEND system image, run
-
-```shell
-julia --project=. build_sysimage.jl
-```
-
-Afterwards, you can use
-
-```shell
-julia --project="/path/to/this/legend-julia-tutorial" --sysimage="/path/to/legend-julia-tutorial/JuliaSysimage.so"
-```
-
-to run Julia with the custom system image. Note: The file name of the system image file is OS-dependent: on Linux it is "JuliaSysimage.so", on OS-X it is "JuliaSysimage.dylib", and on Windows it is "JuliaSysimage.dll".
-
-Also note that using a custom Julia system image freezes all included packages and all their transitive dependencies to the package version used when generating the image. While the custom system image is used, none of these Julia packages can be updated. The system image will also only work for your current Julia version.
-
-If you activate the "legend-julia-tutorial" project/environment in the [Julia plugin for Visual Studio Code](https://www.julia-vscode.org/), you may want to enable the `"julia.useCustomSysimage"` option to [use the custom system image automatically](https://www.julia-vscode.org/docs/stable/userguide/compilesysimage/).
-
-
 ## Learning (more about) Julia
 
 If you're interesting in learning Julia, or just learning more about Julia, the [Julia website](https://julialang.org/) provides many [links to introductory videos and written tutorials](https://julialang.org/learning/), e.g. ["Intro to Julia"](https://www.youtube.com/watch?v=fMa1qSg_LxA),
