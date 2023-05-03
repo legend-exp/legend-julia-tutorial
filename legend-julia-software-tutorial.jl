@@ -1,5 +1,14 @@
 # This tutorial is licensed under the MIT License (MIT).
 
+## Ensure that the right Julia project environment is active:
+
+import Pkg
+Pkg.activate(@__DIR__)
+Pkg.instantiate() # Need to run this only once
+basename(dirname(Pkg.project().path))
+
+#-
+
 ## Load required Julia packages:
 
 using Plots
