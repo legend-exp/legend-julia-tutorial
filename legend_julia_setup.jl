@@ -10,10 +10,12 @@ else
     @info("Legend Julia package registry seems to be installed already.")
 end
 
+
 if !("IJulia" in keys(Pkg.project().dependencies))
     @info "Installing IJulia into default Julia environment \"$(Pkg.project().path)\""
     Pkg.add("IJulia"); Pkg.build("IJulia")
 end
+
 
 if !("Revise" in keys(Pkg.project().dependencies))
     @info "Installing IJulia into default Julia environment \"$(Pkg.project().path)\""
@@ -54,5 +56,29 @@ end
 else
     @warn "File \"$startup_ijulia_jl\" already exists, not adding Revise initialization code automatically."
 end
+
+
+if ispath("/usr/local/cuda")
+    @info "Local CUDA installation detected, configuring Julia to use it."
+
+    local_prefs_toml = joinpath(dirname(Pkg.project().path), "LocalPreferences.toml")
+    if !isfile(local_prefs_toml)
+        @info "Adding Revise initialization code to \"$local_prefs_toml\"."
+        write(local_prefs_toml,
+"""
+[CUDA_Runtime_jll]
+version = "local"
+"""
+        )
+    else
+        @warn "File \"$local_prefs_toml\" already exists, not setting local CUDA setting."
+    end
+
+    if !("CUDA_Runtime_jll" in keys(Pkg.project().dependencies))
+        @info "Installing CUDA_Runtime_jll into default Julia environment \"$(Pkg.project().path)\""
+        Pkg.add("CUDA_Runtime_jll")
+    end
+end 
+
 
 @info "All done, enjoy using Julia for LEGEND!"
