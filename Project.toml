@@ -66,5 +66,5 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 [compat]
 RadiationDetectorSignals = "0.3"
 RadiationSpectra = "0.5"
-SolidStateDetectors = "^0.8.5"
+SolidStateDetectors = "0.9"
 julia = "1.8"
