@@ -67,6 +67,7 @@ if ispath("/usr/local/cuda")
         write(local_prefs_toml,
 """
 [CUDA_Runtime_jll]
+local = "true"
 version = "local"
 """
         )
