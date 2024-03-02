@@ -28,7 +28,7 @@ makedocs(
     ],
     format = Documenter.HTML(canonical = "https://legend-exp.github.io/legend-julia-tutorial/stable/", prettyurls = !("local" in ARGS)),
     linkcheck = ("linkcheck" in ARGS),
-    strict = !("local" in ARGS),
+    warnonly = ("nonstrict" in ARGS),
 )
 
 deploydocs(

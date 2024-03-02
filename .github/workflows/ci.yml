@@ -29,6 +29,8 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: Add registries
+        run: julia legend_julia_setup.jl
       - uses: julia-actions/julia-buildpkg@latest
       - name: Make and deploy docs
         env:
