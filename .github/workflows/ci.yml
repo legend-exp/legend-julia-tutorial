@@ -31,6 +31,10 @@ jobs:
             ${{ runner.os }}-
       - name: Add registries
         run: julia legend_julia_setup.jl
+      - name: Copy the data
+        run: cp -r data docs/src/data
+      - name: Copy the Project.toml and Manifest.toml
+        run: cp *.toml docs/src/.  
       - uses: julia-actions/julia-buildpkg@latest
       - name: Make and deploy docs
         env:
