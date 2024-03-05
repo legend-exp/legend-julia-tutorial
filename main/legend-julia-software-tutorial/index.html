@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tutorial · Legend Julia Software Tutorial</title><meta name="title" content="Tutorial · Legend Julia Software Tutorial"/><meta property="og:title" content="Tutorial · Legend Julia Software Tutorial"/><meta property="twitter:title" content="Tutorial · Legend Julia Software Tutorial"/><meta name="description" content="Documentation for Legend Julia Software Tutorial."/><meta property="og:description" content="Documentation for Legend Julia Software Tutorial."/><meta property="twitter:description" content="Documentation for Legend Julia Software Tutorial."/><meta property="og:url" content="https://legend-exp.github.io/legend-julia-tutorial/stable/legend-julia-software-tutorial/"/><meta property="twitter:url" content="https://legend-exp.github.io/legend-julia-tutorial/stable/legend-julia-software-tutorial/"/><link rel="canonical" href="https://legend-exp.github.io/legend-julia-tutorial/stable/legend-julia-software-tutorial/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href>Legend Julia Software Tutorial</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Tutorial</a><ul class="internal"><li><a class="tocitem" href="#Calculation-of-detector-potentials-and-fields"><span>Calculation of detector potentials and fields</span></a></li><li class="toplevel"><a class="tocitem" href="#Drift-and-waveform-simulation"><span>Drift and waveform simulation</span></a></li><li class="toplevel"><a class="tocitem" href="#I/O"><span>I/O</span></a></li><li class="toplevel"><a class="tocitem" href="#Quick-simulation"><span>Quick simulation</span></a></li><li><a class="tocitem" href="#Waveform-generation-for-Geant4-MC-events"><span>Waveform generation for Geant4 MC events</span></a></li><li><a class="tocitem" href="#Waveform-DSP"><span>Waveform DSP</span></a></li><li><a class="tocitem" href="#Spectrum-analysis"><span>Spectrum analysis</span></a></li></ul></li><li><a class="tocitem" href="../LICENSE/">LICENSE</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Tutorial</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tutorial</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/legend-exp/legend-julia-tutorial" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/legend-exp/legend-julia-tutorial/blob/main/legend-julia-software-tutorial.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><p>This tutorial is licensed under the MIT License (MIT).</p><pre><code class="language-julia hljs"># Ensure that the right Julia project environment is active:
+
+import Pkg
+Pkg.activate(@__DIR__)
+Pkg.instantiate() # Need to run this only once
+basename(dirname(Pkg.project().path))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;build&quot;</code></pre><pre><code class="language-julia hljs"># Load required Julia packages:
+
+using Plots
+
+using ArraysOfArrays, StaticArrays, Tables, TypedTables
+using Statistics, Random, Distributions, StatsBase
+using Unitful
+import HDF5
+
+using SolidStateDetectors
+using RadiationSpectra
+using RadiationDetectorSignals
+using RadiationDetectorSignals: group_by_evtno, ungroup_by_evtno, group_by_evtno_and_detno
+using LegendDataTypes
+using LegendHDF5IO: readdata, writedata
+using LegendTextIO</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module EncodedArrays with build ID fafbfcfd-8b14-762c-0000-007970176a2e is missing from the cache.
+<span class="sgr33"><span class="sgr1">│ </span></span>This may mean EncodedArrays [97725368-735e-11e9-0dd7-6bf34c3b13a8] does not support precompilation but is imported by a module that does.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1948</span>
+<span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Module LegendDataTypes with build ID fafbfcfd-c566-d791-0000-007b263b2370 is missing from the cache.
+<span class="sgr33"><span class="sgr1">│ </span></span>This may mean LegendDataTypes [99e09c13-5545-5ee2-bfa2-77f358fb75d8] does not support precompilation but is imported by a module that does.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Base loading.jl:1948</span></code></pre><p>&lt;h1 style=&quot;text-align: center&quot;&gt;     LEGEND Software Stack Tutorial in &lt;br/&gt;     &lt;img alt=&quot;Julia&quot; src=&quot;images/logos/julia-logo.svg&quot; style=&quot;height: 4em; display: inline-block; margin: 1em;&quot;/&gt;     &lt;img alt=&quot;Julia&quot; src=&quot;images/logos/ssd_logo.svg&quot; style=&quot;height: 4em; display: inline-block; margin: 1em;&quot;/&gt; &lt;/h1&gt;</p><p>&lt;p style=&quot;text-align: center&quot;&gt;     Felix&amp;nbsp;Hagemann&amp;nbsp;&amp;lang;&lt;a href=&quot;mailto:hagemann@mpp.mpg.de&quot; target=&quot;<em>blank&quot;&gt;hagemann@mpp.mpg.de&lt;/a&gt;&amp;rang;,     Lukas&amp;nbsp;Hauertmann&amp;nbsp;&amp;lang;&lt;a href=&quot;mailto:lhauert@mpp.mpg.de&quot; target=&quot;</em>blank&quot;&gt;lhauert@mpp.mpg.de&lt;/a&gt;&amp;rang;,     David&amp;nbsp;Hervas&amp;nbsp;Aguilar&amp;nbsp;&amp;lang;&lt;a href=&quot;mailto:hervasa2@mpp.mpg.de&quot; target=&quot;<em>blank&quot;&gt;hervasa2@mpp.mpg.de&lt;/a&gt;&amp;rang;,     Oliver&amp;nbsp;Schulz&amp;nbsp;&amp;lang;&lt;a href=&quot;mailto:oschulz@mpp.mpg.de&quot; target=&quot;</em>blank&quot;&gt;oschulz@mpp.mpg.de&lt;/a&gt;&amp;rang;,     Martin&amp;nbsp;Schuster&amp;nbsp;&amp;lang;&lt;a href=&quot;mailto:schuster@mpp.mpg.de&quot; target=&quot;<em>blank&quot;&gt;schuster@mpp.mpg.de&lt;/a&gt;&amp;rang;,     Anna&amp;nbsp;Julia&amp;nbsp;Zsigmond&amp;nbsp;&amp;lang;&lt;a href=&quot;azsigmon@mpp.mpg.de&quot; target=&quot;</em>blank&quot;&gt;azsigmon@mpp.mpg.de&lt;/a&gt;&amp;rang; &lt;/p&gt;</p><p>&lt;p style=&quot;text-align: center&quot;&gt;     SolidStateDetectors.jl (SSD)&lt;br&gt;     &lt;a href=&quot;https://juliaphysics.github.io/SolidStateDetectors.jl/stable/&quot; target=&quot;<em>blank&quot;&gt;Documentation&lt;/a&gt;&lt;br&gt;     &lt;a href=&quot;https://github.com/JuliaPhysics/SolidStateDetectors.jl&quot; target=&quot;</em>blank&quot;&gt;GitHub&lt;/a&gt;&lt;br&gt;     &lt;a href=&quot;https://iopscience.iop.org/article/10.1088/1748-0221/16/08/P08007&quot; target=&quot;_blank&quot;&gt;Paper&lt;/a&gt; &lt;/p&gt; &lt;div style=&quot;margin-top:0.0em&quot;&gt;     &lt;p style=&quot;text-align: center&quot;&gt;         &lt;img alt=&quot;LEGEND Logo&quot; src=&quot;images/logos/legend-logo.svg&quot; style=&quot;height: 20em; display: inline-block; margin: 0em;&quot;/&gt;     &lt;/p&gt; &lt;/div&gt;</p><p>&lt;p&gt;See &lt;a href=&quot;README.md&quot;&gt;README.md&lt;/a&gt; for instructions.&lt;/p&gt;</p><h2 id="Calculation-of-detector-potentials-and-fields"><a class="docs-heading-anchor" href="#Calculation-of-detector-potentials-and-fields">Calculation of detector potentials and fields</a><a id="Calculation-of-detector-potentials-and-fields-1"></a><a class="docs-heading-anchor-permalink" href="#Calculation-of-detector-potentials-and-fields" title="Permalink"></a></h2><h3 id="Detector-definition"><a class="docs-heading-anchor" href="#Detector-definition">Detector definition</a><a id="Detector-definition-1"></a><a class="docs-heading-anchor-permalink" href="#Detector-definition" title="Permalink"></a></h3><p>First, load a detector definition - here, an inverted-coaxial example detector design:</p><pre><code class="language-julia hljs">detector_config_filename = SSD_examples[:InvertedCoax]
+T = Float32 # Optional; Default is Float32, but works with Float64 as well
+sim = Simulation{T}(detector_config_filename)
+plot(sim.detector, size = (700, 700))</code></pre><img src="c182ebd7.svg" alt="Example block output"/><p>One can also have a look at how the initial conditions look like on the grid (it starts with a very coarse grid):</p><p>This is optional. Its only to have a look at the initial state. For example, if you want to check if you specified the detector geometry correctly in your configuration file.</p><pre><code class="language-julia hljs">apply_initial_state!(sim, ElectricPotential)
+plot(
+    plot(sim.electric_potential), # initial electric potential (boundary conditions)
+    plot(sim.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
+    plot(sim.q_eff_imp), # effective charge density distribution
+    plot(sim.ϵ_r), # dielectric distribution
+    layout = (1, 4), size = (1600, 500)
+)</code></pre><img src="f6d0b9cf.svg" alt="Example block output"/><p>Next, calculate the electric potential:</p><pre><code class="language-julia hljs">calculate_electric_potential!(sim, convergence_limit = 1e-6, refinement_limits = [0.2, 0.1, 0.05, 0.01])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Simulation: Public Inverted Coax
+Electric Potential Calculation
+Bias voltage: 3500.0 V
+φ symmetry: Detector is φ-symmetric -&gt; 2D computation.
+Precision: Float32
+Device: CPU
+Max. CPU Threads: 1
+Coordinate system: Cylindrical
+N Refinements: -&gt; 4
+Convergence limit: 1.0e-6  =&gt; 0.0035 V
+Initial grid size: (24, 1, 20)
+
+Grid size: (30, 1, 30) - using 1 threads now:
+Grid size: (40, 1, 50) - using 1 threads now:
+Grid size: (66, 1, 92) - using 1 threads now:
+Grid size: (272, 1, 380) - using 1 threads now:</code></pre><pre><code class="language-julia hljs">plot(
+    plot(sim.electric_potential, φ = 20), # initial electric potential (boundary conditions)
+    plot(sim.point_types), # map of different point types: fixed point / inside or outside detector volume / depleted/undepleted
+    plot(sim.q_eff_imp), # effective charge density distribution
+    plot(sim.ϵ_r), # dielectric distribution
+    layout = (1, 4), size = (1600, 500)
+)</code></pre><img src="ead2ddd6.svg" alt="Example block output"/><p>SolidStateDetectors.jl supports active (i.e. depleted) volume calculation:</p><pre><code class="language-julia hljs">get_active_volume(sim.point_types) # approximation (sum of the volume of cells marked as depleted)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">239.12766f0 cm^3</code></pre><h3 id="Partially-depleted-detectors"><a class="docs-heading-anchor" href="#Partially-depleted-detectors">Partially depleted detectors</a><a id="Partially-depleted-detectors-1"></a><a class="docs-heading-anchor-permalink" href="#Partially-depleted-detectors" title="Permalink"></a></h3><p>SolidStateDetectors.jl can also calculate the electric potential of a partially depleted detector:</p><pre><code class="language-julia hljs">sim_undep = deepcopy(sim)
+sim_undep.detector = SolidStateDetector(sim_undep.detector, contact_id = 2, contact_potential = 500); # V  &lt;-- Bias Voltage of Mantle
+
+calculate_electric_potential!( sim_undep,
+                               depletion_handling = true,
+                               convergence_limit = 1e-6,
+                               refinement_limits = [0.2, 0.1, 0.05, 0.03],
+                               verbose = false)
+
+plot(
+    plot(sim_undep.electric_potential),
+    plot(sim_undep.point_types),
+    layout = (1, 2), size = (800, 700)
+)</code></pre><img src="9be16aae.svg" alt="Example block output"/><pre><code class="language-julia hljs">println(&quot;Depleted:   &quot;, get_active_volume(sim.point_types))
+println(&quot;Undepleted: &quot;, get_active_volume(sim_undep.point_types));</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Depleted:   239.12766f0 cm^3
+Undepleted: 155.73439f0 cm^3</code></pre><h3 id="Electric-field-calculation"><a class="docs-heading-anchor" href="#Electric-field-calculation">Electric field calculation</a><a id="Electric-field-calculation-1"></a><a class="docs-heading-anchor-permalink" href="#Electric-field-calculation" title="Permalink"></a></h3><p>Calculate the electric field of the fully depleted detector, given the already calculated electric potential:</p><pre><code class="language-julia hljs">calculate_electric_field!(sim, n_points_in_φ = 72)
+calculate_electric_field!(sim_undep, n_points_in_φ = 72)</code></pre><pre><code class="language-julia hljs">plot(sim.electric_field, full_det = true, φ = 0.0, size = (700, 700))
+plot_electric_fieldlines!(sim, full_det = true, φ = 0.0)</code></pre><img src="3036c487.svg" alt="Example block output"/><h3 id="Weighting-potential-calculation"><a class="docs-heading-anchor" href="#Weighting-potential-calculation">Weighting potential calculation</a><a id="Weighting-potential-calculation-1"></a><a class="docs-heading-anchor-permalink" href="#Weighting-potential-calculation" title="Permalink"></a></h3><p>We need weighting potentials to simulate the detector charge signal induced by drifting charges. We&#39;ll calculate the weighting potential for the point contact and the outer shell of the detector:</p><pre><code class="language-julia hljs">for contact in sim.detector.contacts
+    calculate_weighting_potential!(sim, contact.id, refinement_limits = [0.2, 0.1, 0.05, 0.01], n_points_in_φ = 2, verbose = false)
+end</code></pre><pre><code class="language-julia hljs">plot(
+    plot(sim.weighting_potentials[1]),
+    plot(sim.weighting_potentials[2]),
+    size = (900, 700)
+)</code></pre><img src="4313e02a.svg" alt="Example block output"/><h3 id="Detector-capacitance"><a class="docs-heading-anchor" href="#Detector-capacitance">Detector capacitance</a><a id="Detector-capacitance-1"></a><a class="docs-heading-anchor-permalink" href="#Detector-capacitance" title="Permalink"></a></h3><p>After the weighting potentials are calculated, one can determine the detector capacitance matrix:</p><pre><code class="language-julia hljs">calculate_capacitance_matrix(sim)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2×2 Matrix{Unitful.Quantity{Float32, 𝐈^2 𝐓^4 𝐋^-2 𝐌^-1, Unitful.FreeUnits{(pF,), 𝐈^2 𝐓^4 𝐋^-2 𝐌^-1, nothing}}}:
+   3.4293 pF  -3.42251 pF
+ -3.42066 pF   5.02803 pF</code></pre><h1 id="Drift-and-waveform-simulation"><a class="docs-heading-anchor" href="#Drift-and-waveform-simulation">Drift and waveform simulation</a><a id="Drift-and-waveform-simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Drift-and-waveform-simulation" title="Permalink"></a></h1><p>Given the electric field and a charge drift model, the charge drift can be simulated:</p><pre><code class="language-julia hljs">charge_drift_model = ADLChargeDriftModel()
+sim.detector = SolidStateDetector(sim.detector, charge_drift_model);</code></pre><p>Now, let&#39;s create an &quot;random&quot; (multisite) event:</p><pre><code class="language-julia hljs">starting_positions = [ CylindricalPoint{T}( 0.020, deg2rad(10), 0.015 ),
+                       CylindricalPoint{T}( 0.015, deg2rad(20), 0.045 ),
+                       CylindricalPoint{T}( 0.022, deg2rad(35), 0.025 ) ]
+energy_depos = T[1460, 609, 1000] * u&quot;keV&quot; # are needed later in the signal generation
+
+evt = Event(starting_positions, energy_depos);</code></pre><pre><code class="language-julia hljs">simulate!(evt, sim, Δt = 5u&quot;ns&quot;)</code></pre><pre><code class="language-julia hljs">plot(sim.detector, size = (700, 700))
+plot!(evt.drift_paths)</code></pre><img src="eebdc974.svg" alt="Example block output"/><pre><code class="language-julia hljs">p_pc_signal = plot( evt.waveforms[1], lw = 1.5, xlims = (0, 1000), xlabel = &quot;Time&quot;, ylabel = &quot;Charge&quot;,
+                    unitformat = :slash, legend = false, tickfontsize = 12, guidefontsize = 14)</code></pre><img src="5d15dcfa.svg" alt="Example block output"/><h1 id="I/O"><a class="docs-heading-anchor" href="#I/O">I/O</a><a id="I/O-1"></a><a class="docs-heading-anchor-permalink" href="#I/O" title="Permalink"></a></h1><p>The package offers a conversion of all the calculated fields to <code>NamedTuple</code>s which allows for saving and loading them into HDF5 files via the <a href="https://github.com/legend-exp/LegendHDF5IO.jl">LegendHDF5IO.jl</a> package:</p><pre><code class="language-julia hljs">sim</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><pre><code class="language-julia hljs">filename = &quot;cache/inverted_coax_simulation.h5f&quot;
+if !ispath(dirname(filename)) mkpath(dirname(filename)) end
+ssd_write(filename, sim)</code></pre><pre><code class="language-julia hljs">sim = ssd_read(filename, Simulation);</code></pre><h1 id="Quick-simulation"><a class="docs-heading-anchor" href="#Quick-simulation">Quick simulation</a><a id="Quick-simulation-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-simulation" title="Permalink"></a></h1><p>All the above steps, which offer more fine control over the individual steps, can be done with one function, <code>simulate!</code>. This can be useful if one just want to quickly test the config file for a new detector.</p><pre><code class="language-julia hljs">quick_sim = Simulation{T}(detector_config_filename)
+simulate!(quick_sim);
+plot(
+    plot(quick_sim.electric_potential),
+    plot(quick_sim.weighting_potentials[1]),
+    plot(quick_sim.weighting_potentials[2]),
+    size = (1200, 500), layout = (1, 3)
+)</code></pre><img src="07244512.svg" alt="Example block output"/><h2 id="Waveform-generation-for-Geant4-MC-events"><a class="docs-heading-anchor" href="#Waveform-generation-for-Geant4-MC-events">Waveform generation for Geant4 MC events</a><a id="Waveform-generation-for-Geant4-MC-events-1"></a><a class="docs-heading-anchor-permalink" href="#Waveform-generation-for-Geant4-MC-events" title="Permalink"></a></h2><p>Let&#39;s read in some Monte-Carlo events (produced by Geant4). We&#39;ll either read from Geant4 CSV and cache the result as HDF5, or read directly from HDF5 if already available:</p><pre><code class="language-julia hljs">mctruth_filename_csv = joinpath(&quot;data&quot;, &quot;dual-invcoax-mctruth.csv&quot;)
+mctruth_filename_hdf5 = joinpath(&quot;cache&quot;, &quot;dual-invcoax-mctruth.h5&quot;)
+if isfile(mctruth_filename_hdf5)
+    println(&quot;Reading MC events from HDF5.&quot;)
+    mc_events = HDF5.h5open(mctruth_filename_hdf5, &quot;r&quot;) do input
+        readdata(input, &quot;mctruth&quot;)
+    end
+else
+    println(&quot;Reading MC events from Geant4-CSV.&quot;)
+    mc_events = open(read, mctruth_filename_csv, Geant4CSVInput)
+    mkpath(dirname(mctruth_filename_hdf5))
+    println(&quot;Writing MC events to HDF5.&quot;)
+    HDF5.h5open(mctruth_filename_hdf5, &quot;w&quot;) do output
+        writedata(output, &quot;mctruth&quot;, mc_events)
+    end
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Reading MC events from Geant4-CSV.
+Writing MC events to HDF5.</code></pre><p>Producing pulse shapes from raw MC events is wasteful, it&#39;s more efficient to cluster detectors hits (within a small radius) first:</p><pre><code class="language-julia hljs">println(&quot;$(sum(length.(mc_events.edep))) hits before clustering&quot;)
+mc_events_clustered = @time SolidStateDetectors.cluster_detector_hits(mc_events, 0.2u&quot;mm&quot;)
+println(&quot;$(sum(length.(mc_events_clustered.edep))) hits after clustering&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">319771 hits before clustering
+  3.065401 seconds (6.20 M allocations: 563.630 MiB, 12.70% gc time, 69.73% compilation time)
+51837 hits after clustering</code></pre><p>Table of MC events is of type <code>DetectorHitEvents</code>:</p><pre><code class="language-julia hljs">typeof(mc_events_clustered) &lt;: DetectorHitEvents</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>We have a plotting recipe for <code>DetectorHitEvents</code>:</p><pre><code class="language-julia hljs">plot(mc_events_clustered)</code></pre><img src="6fb0ee0a.svg" alt="Example block output"/><p>Waveform generation has to be per detector. Let&#39;s reshuffle the detector hits, grouping by event number and detector:</p><pre><code class="language-julia hljs">hits = ungroup_by_evtno(mc_events_clustered)
+mc_events_per_det = group_by_evtno_and_detno(hits)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Table with 5 columns and 25026 rows:
+      evtno  detno  thit                  edep                  ⋯
+    ┌────────────────────────────────────────────────────────────
+ 1  │ 2      1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 2  │ 7      1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 3  │ 12     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 4  │ 13     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 5  │ 17     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 6  │ 40     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 7  │ 44     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 8  │ 55     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 9  │ 62     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 10 │ 64     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 11 │ 95     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 12 │ 102    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 13 │ 113    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 14 │ 121    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 15 │ 133    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 16 │ 148    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 17 │ 150    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ ⋮  │   ⋮      ⋮             ⋮                     ⋮            ⋱</code></pre><p>The hits are now grouped by event number, but separately for each detector, and sorted by detector number:</p><pre><code class="language-julia hljs">issorted(mc_events_per_det.detno)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>This makes it easy to group them by detector number ...</p><pre><code class="language-julia hljs">mc_events_by_det = Table(consgroupedview(mc_events_per_det.detno, Tables.columns(mc_events_per_det)))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Table with 5 columns and 2 rows:
+     evtno                 detno                 thit                  ⋯
+   ┌────────────────────────────────────────────────────────────────────
+ 1 │ Int32[2, 7, 12, 13,…  Int32[1, 1, 1, 1, 1…  Vector{Quantity{Flo…  ⋯
+ 2 │ Int32[16, 24, 55, 7…  Int32[2, 2, 2, 2, 2…  Vector{Quantity{Flo…  ⋯</code></pre><p>... and get all events for detector 1 in one chunk:</p><pre><code class="language-julia hljs">mc_events_det1 = Table(mc_events_by_det[1])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Table with 5 columns and 15796 rows:
+      evtno  detno  thit                  edep                  ⋯
+    ┌────────────────────────────────────────────────────────────
+ 1  │ 2      1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 2  │ 7      1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 3  │ 12     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 4  │ 13     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 5  │ 17     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 6  │ 40     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 7  │ 44     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 8  │ 55     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 9  │ 62     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 10 │ 64     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 11 │ 95     1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 12 │ 102    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 13 │ 113    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 14 │ 121    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 15 │ 133    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 16 │ 148    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ 17 │ 150    1      Quantity{Float32, 𝐓…  Quantity{Float32, 𝐋…  ⋯
+ ⋮  │   ⋮      ⋮             ⋮                     ⋮            ⋱</code></pre><pre><code class="language-julia hljs">plot(mc_events_det1)</code></pre><img src="db53ce47.svg" alt="Example block output"/><p>Raw MC events have a very narrow line width:</p><pre><code class="language-julia hljs">stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, yscale = :log10)</code></pre><img src="43ae29d5.svg" alt="Example block output"/><p>Let&#39;s make things more realistic by adding Fano noise:</p><pre><code class="language-julia hljs">Random.seed!(123) # only for testing
+det_material = sim.detector.semiconductor.material
+mc_events_fnoise = add_fano_noise(mc_events_det1, det_material.E_ionisation, det_material.f_fano)
+stephist(ustrip.(sum.(mc_events_det1.edep)), bins = 2600:0.1:2625, label = &quot;raw MC edep&quot;, yscale = :log10)
+stephist!(ustrip.(sum.(mc_events_fnoise.edep)), bins = 2600:0.1:2625, label = &quot;with Fano noise&quot;, yscale = :log10)</code></pre><img src="6ca60dab.svg" alt="Example block output"/><p>Also, we need to filter out the few events that, due to numerical effects, lie outside of the detector (the proper solution is to shift them slightly, this feature will be added in the future):</p><pre><code class="language-julia hljs">filtered_events = mc_events_fnoise[findall(pts -&gt; all(p -&gt; CartesianPoint(T.(ustrip.(uconvert.(u&quot;m&quot;, p)))) in sim.detector, pts), mc_events_fnoise.pos)];
+length(filtered_events)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">15796</code></pre><pre><code class="language-julia hljs">contact_charge_signals = simulate_waveforms(
+        filtered_events[1:2000],
+        sim,
+        max_nsteps = 4000,
+        Δt = 1u&quot;ns&quot;,
+        verbose = false);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr36"><span class="sgr1">[ Info: </span></span>Detector has 2 contacts
+<span class="sgr36"><span class="sgr1">[ Info: </span></span>Table has 2000 physics events (4153 single charge depositions).
+<span class="sgr32">Progress:   0%|                                         |  ETA: 0:43:31</span><span class="sgr32">Progress:  50%|████████████████████▌                    |  ETA: 0:00:06</span><span class="sgr32">Progress:  53%|█████████████████████▊                   |  ETA: 0:00:06</span><span class="sgr32">Progress:  55%|██████████████████████▋                  |  ETA: 0:00:05</span><span class="sgr32">Progress:  58%|███████████████████████▉                 |  ETA: 0:00:05</span><span class="sgr32">Progress:  61%|█████████████████████████                |  ETA: 0:00:04</span><span class="sgr32">Progress:  63%|██████████████████████████               |  ETA: 0:00:04</span><span class="sgr32">Progress:  66%|███████████████████████████▏             |  ETA: 0:00:04</span><span class="sgr32">Progress:  69%|████████████████████████████▎            |  ETA: 0:00:03</span><span class="sgr32">Progress:  71%|█████████████████████████████▎           |  ETA: 0:00:03</span><span class="sgr32">Progress:  74%|██████████████████████████████▎          |  ETA: 0:00:03</span><span class="sgr32">Progress:  76%|███████████████████████████████▍         |  ETA: 0:00:02</span><span class="sgr32">Progress:  79%|████████████████████████████████▍        |  ETA: 0:00:02</span><span class="sgr32">Progress:  82%|█████████████████████████████████▌       |  ETA: 0:00:02</span><span class="sgr32">Progress:  84%|██████████████████████████████████▋      |  ETA: 0:00:01</span><span class="sgr32">Progress:  88%|████████████████████████████████████     |  ETA: 0:00:01</span><span class="sgr32">Progress:  91%|█████████████████████████████████████▎   |  ETA: 0:00:01</span><span class="sgr32">Progress:  94%|██████████████████████████████████████▌  |  ETA: 0:00:01</span><span class="sgr32">Progress:  96%|███████████████████████████████████████▌ |  ETA: 0:00:00</span><span class="sgr32">Progress:  99%|████████████████████████████████████████▊|  ETA: 0:00:00</span><span class="sgr32">Progress: 100%|█████████████████████████████████████████| Time: 0:00:08</span>
+<span class="sgr36"><span class="sgr1">[ Info: </span></span>Generating waveforms...</code></pre><p>Let&#39;s plot the first 100 generated waveforms:</p><pre><code class="language-julia hljs">waveforms = ArrayOfRDWaveforms(contact_charge_signals.waveform)
+plot(waveforms[1:100], legend = false)</code></pre><img src="63a51a7d.svg" alt="Example block output"/><p>One can also look individual events</p><pre><code class="language-julia hljs">evt1 = Event(filtered_events[1], T)
+simulate!(evt1, sim, max_nsteps = 4000, Δt = 1u&quot;ns&quot;, verbose = true)
+p_drift = plot(sim.detector, label = &quot;&quot;)
+plot!(evt1.drift_paths)
+p_signal = plot(evt1.waveforms[1], lw = 2, legend = false)
+plot(p_drift, p_signal, size = (800, 400))</code></pre><img src="261c1734.svg" alt="Example block output"/><p>We should add pre- and post-pulse baselines ...</p><pre><code class="language-julia hljs">waveforms_with_baseline_and_tail = ArrayOfRDWaveforms(SolidStateDetectors.add_baseline_and_extend_tail.(waveforms, 1200, 7000));
+plot(waveforms_with_baseline_and_tail[1:10], legend = false)</code></pre><img src="255e89e1.svg" alt="Example block output"/><p>... and also add some random values along the waveforms to simulate electronics noise in a simple fashion:</p><pre><code class="language-julia hljs">noisy_waveforms = ArrayOfRDWaveforms(
+    map(
+        wf -&gt; RDWaveform(wf.time, wf.signal .+ rand!(Normal(0, 5e3), similar(ustrip.(wf.signal)))*unit(eltype(wf.signal))),
+        waveforms_with_baseline_and_tail
+    )
+);</code></pre><pre><code class="language-julia hljs">plot(noisy_waveforms[1:100], legend = false, size = (900, 400))</code></pre><img src="69c2a100.svg" alt="Example block output"/><h2 id="Waveform-DSP"><a class="docs-heading-anchor" href="#Waveform-DSP">Waveform DSP</a><a id="Waveform-DSP-1"></a><a class="docs-heading-anchor-permalink" href="#Waveform-DSP" title="Permalink"></a></h2><p>Note: This section only demonstrates a very simple form of DSP for energy reconstruction, and will be extended in the near future.</p><p>We can reconstruct a spectrum from the simulated waveforms, using the difference between the pre- and post-pulse baseline means as energy of the events (equivalent to a triangular shaping filter in a fixed position):</p><pre><code class="language-julia hljs">filter_length = 50
+pre_pulse_mean = mean.(map(signal -&gt; signal[1:filter_length], noisy_waveforms.signal))
+pre_pulse_std = std.(map(signal -&gt; signal[1:filter_length], noisy_waveforms.signal))
+energy_threshold = mean(pre_pulse_std) * 3
+post_pulse_mean = mean.(map(signal -&gt; signal[end-filter_length:end], noisy_waveforms.signal))
+E_reco = post_pulse_mean .- pre_pulse_mean
+hist_uncal = fit(Histogram, ustrip.(filter(e -&gt; e &gt; energy_threshold, E_reco)), nbins = 1000)
+plot(hist_uncal, st = :step, yscale = :log10, label=&quot;uncalibrated spectrum&quot;)</code></pre><img src="64060e98.svg" alt="Example block output"/><h2 id="Spectrum-analysis"><a class="docs-heading-anchor" href="#Spectrum-analysis">Spectrum analysis</a><a id="Spectrum-analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Spectrum-analysis" title="Permalink"></a></h2><p>The package <a href="https://github.com/JuliaPhysics/RadiationSpectra.jl">RadiationSpectra.jl</a> provides a mechanism finding peaks in the spectrum. It can also run an auto-calibration of the spectrum, given a list of gamma lines that may be in the spectrum:</p><pre><code class="language-julia hljs">gamma_lines = [510.77, 583.191, 727.330, 860.564, 2614.533]
+
+h_cal, h_deconv, peakPositions, threshold, c, c_precal = RadiationSpectra.calibrate_spectrum(
+    hist_uncal, gamma_lines)
+
+p_uncal = plot(hist_uncal, st=:step, label = &quot;uncalibrated spectrum&quot;, tickfontsize = 12, legendfontsize = 12)
+p_deconv = plot(h_deconv, st=:step, label = &quot;deconvolved spectrum&quot;, tickfontsize = 12, legendfontsize = 12)
+hline!([threshold], label =&quot;threshold&quot;)
+p_cal = plot(h_cal, st = :step, yscale = :log10, label=&quot;calibrated spectrum&quot;, xlabel=&quot;E / keV&quot;, xlims=[0, 3000], xticks=0:500:3000, tickfontsize = 12, legendfontsize = 12, guidefontsize = 14)
+vline!(gamma_lines, label=&quot;gamma lines: $(gamma_lines)&quot;)
+plot(p_uncal, p_deconv, p_cal, layout = (3,1), size = (1000, 700))</code></pre><img src="1d1a3ed6.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="../LICENSE/">LICENSE »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Tuesday 5 March 2024 00:20">Tuesday 5 March 2024</span>. Using Julia version 1.10.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
