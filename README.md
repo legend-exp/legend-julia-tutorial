@@ -31,7 +31,7 @@ Julia is easy to install:
 
 * You may want to add the Julia "bin" directory to your `$PATH"`
 
-We recommend using Julia v1.10 or later to run this tutorial.
+We recommend using Julia v1.11 or later to run this tutorial.
 
 
 #### Optional: Installing Jupyter
