@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.0-rc4"
+julia_version = "1.11.0"
 manifest_format = "2.0"
-project_hash = "6c1f790a3352994ea93cf6ef1af94ac45a624f5d"
+project_hash = "f01c9892a2e4ceadd1478c9db17d49d770c058ad"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -1059,6 +1059,12 @@ git-tree-sha1 = "5ee6203157c120d79034c748a2acba45b82b8807"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
 version = "2.40.1+0"
 
+[[deps.LightXML]]
+deps = ["Libdl", "XML2_jll"]
+git-tree-sha1 = "3a994404d3f6709610701c7dabfc03fed87a81f8"
+uuid = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
+version = "0.9.1"
+
 [[deps.LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf"]
 git-tree-sha1 = "e4c3be53733db1051cc15ecf573b1042b3a712a1"
@@ -1732,10 +1738,16 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 version = "1.11.0"
 
 [[deps.SolidStateDetectors]]
-deps = ["Adapt", "ArraysOfArrays", "Clustering", "DataStructures", "Distributions", "FillArrays", "Format", "GPUArrays", "Interpolations", "IntervalSets", "JSON", "KernelAbstractions", "LaTeXStrings", "LinearAlgebra", "ParallelProcessingTools", "Parameters", "PolygonOps", "Polynomials", "ProgressMeter", "RadiationDetectorSignals", "Random", "RecipesBase", "Requires", "Rotations", "StaticArrays", "Statistics", "StatsBase", "Tables", "TypedTables", "Unitful", "UnitfulAtomic", "YAML"]
-git-tree-sha1 = "af605ae1263b9d8d4666ddd7046b09a52d173721"
+deps = ["Adapt", "ArraysOfArrays", "Clustering", "Distributions", "FillArrays", "Format", "GPUArrays", "Interpolations", "IntervalSets", "JSON", "KernelAbstractions", "LaTeXStrings", "LightXML", "LinearAlgebra", "OrderedCollections", "ParallelProcessingTools", "Parameters", "PolygonOps", "Polynomials", "ProgressMeter", "RadiationDetectorSignals", "Random", "RecipesBase", "Requires", "Rotations", "StaticArrays", "Statistics", "StatsBase", "Suppressor", "Tables", "TypedTables", "Unitful", "UnitfulAtomic", "YAML"]
+git-tree-sha1 = "a744de79cfbcdebc9a9974fd11665f647f81f580"
 uuid = "71e43887-2bd9-5f77-aebd-47f656f0a3f0"
-version = "0.9.9"
+version = "0.10.2"
+
+    [deps.SolidStateDetectors.extensions]
+    SolidStateDetectorsGeant4Ext = "Geant4"
+
+    [deps.SolidStateDetectors.weakdeps]
+    Geant4 = "559df036-b7a0-42fd-85df-7d5dd9d70f44"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
@@ -1861,6 +1873,12 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 version = "7.7.0+0"
+
+[[deps.Suppressor]]
+deps = ["Logging"]
+git-tree-sha1 = "6dbb5b635c5437c68c28c2ac9e39b87138f37c0a"
+uuid = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
+version = "0.2.8"
 
 [[deps.TOML]]
 deps = ["Dates"]
