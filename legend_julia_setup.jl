@@ -1,6 +1,9 @@
 import Pkg
 
-Pkg.activate() # Activate default environment
+# Activate default environment
+# Can't use `Pkg.activate()` with stacked depots if first(DEPOT_PATH) doesn't exist:
+Pkg.activate(joinpath(first(DEPOT_PATH), "environments", "v$(VERSION.major).$(VERSION.minor)"))
+# Will also create he environment if it doesn't exist:
 Pkg.instantiate()
 
 if !ispath(joinpath(first(DEPOT_PATH), "registries", "LegendJuliaRegistry"))
